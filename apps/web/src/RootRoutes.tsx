@@ -1,14 +1,15 @@
 import { Route, Routes } from 'react-router';
 
+import { LoginPage } from '@resnity/web-auth';
+
 import { DashboardPageContainer } from './components/dashboard/DashboardPageContainer';
 import { DashboardLayout } from './layouts/DashboardLayout';
 import { StoreFrontLayout } from './layouts/StoreFrontLayout';
-import { LoginPage } from './modules/auth/LoginPage';
 import { ViewMenusPage } from './modules/dashboard/menu/ViewMenusPage';
 import RestaurantRegistrationForm from './modules/restaurant/RestaurantRegistrationForm';
 import { Menu } from './modules/store-front/ordering/Menu';
 
-const RootRoutes = () => {
+export const RootRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<StoreFrontLayout />}>
@@ -30,5 +31,3 @@ const RootRoutes = () => {
     </Routes>
   );
 };
-
-export default RootRoutes;

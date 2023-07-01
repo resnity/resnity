@@ -23,7 +23,9 @@
       "@resnity/backend-order": ["libs/backend-order/src/index.ts"],
       "@resnity/backend-payment": ["libs/backend-payment/src/index.ts"],
       "@resnity/backend-restaurant": ["libs/backend-restaurant/src/index.ts"],
-      "@resnity/bff-auth": ["libs/bff-auth/src/index.ts"]
+      "@resnity/bff-auth": ["libs/bff-auth/src/index.ts"],
+      "@resnity/web-auth": ["libs/web-auth/src/index.ts"],
+      "@resnity/web-common": ["libs/web-common/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
