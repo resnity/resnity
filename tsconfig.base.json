@@ -1,0 +1,30 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "es2015",
+    "module": "esnext",
+    "lib": ["es2017", "dom"],
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "strict": true,
+    "strictPropertyInitialization": false,
+    "baseUrl": ".",
+    "paths": {
+      "@resnity/backend-auth": ["libs/backend-auth/src/index.ts"],
+      "@resnity/backend-common": ["libs/backend-common/src/index.ts"],
+      "@resnity/backend-menu": ["libs/backend-menu/src/index.ts"],
+      "@resnity/backend-order": ["libs/backend-order/src/index.ts"],
+      "@resnity/backend-payment": ["libs/backend-payment/src/index.ts"],
+      "@resnity/backend-restaurant": ["libs/backend-restaurant/src/index.ts"],
+      "@resnity/bff-auth": ["libs/bff-auth/src/index.ts"]
+    }
+  },
+  "exclude": ["node_modules", "tmp"]
+}
