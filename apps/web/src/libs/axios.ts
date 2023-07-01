@@ -1,6 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 
-import { auth0Client } from '../modules/auth/clients/auth0.client';
+import { auth0Client } from './auth0-client';
 
 const instanceWithAuth = axios.create();
 const instanceWithoutAuth = axios.create();
