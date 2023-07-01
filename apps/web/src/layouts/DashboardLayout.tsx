@@ -1,9 +1,6 @@
-import { Button, Divider, Layout, Menu, MenuProps, theme } from 'antd';
-import { useEffect } from 'react';
+import { Divider, Layout, Menu, MenuProps, theme } from 'antd';
 import { Outlet } from 'react-router';
 import { Link } from 'react-router-dom';
-
-import { useAuth } from '../modules/auth/auth.hooks';
 
 type MenuItem = Required<MenuProps>['items'][number];
 
