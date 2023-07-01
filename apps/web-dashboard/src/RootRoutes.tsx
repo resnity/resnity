@@ -1,6 +1,6 @@
 import { Route, Routes } from 'react-router';
 
-import { LoginPage } from '@resnity/web-auth';
+import { LoginPage, LogoutPage } from '@resnity/web-auth';
 
 import { PageContainer } from './components/PageContainer';
 import { DashboardLayout } from './layouts/DashboardLayout';
@@ -22,6 +22,7 @@ export const RootRoutes = () => {
         />
       </Route>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/logout" element={<LogoutPage />} />
     </Routes>
   );
 };

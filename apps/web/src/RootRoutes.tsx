@@ -1,6 +1,6 @@
 import { Route, Routes } from 'react-router';
 
-import { LoginPage } from '@resnity/web-auth';
+import { LoginPage, LogoutPage } from '@resnity/web-auth';
 
 import { DashboardPageContainer } from './components/dashboard/DashboardPageContainer';
 import { DashboardLayout } from './layouts/DashboardLayout';
@@ -12,6 +12,8 @@ import { Menu } from './modules/store-front/ordering/Menu';
 export const RootRoutes = () => {
   return (
     <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/logout" element={<LogoutPage />} />
       <Route path="/" element={<StoreFrontLayout />}>
         <Route path="ordering" element={<Menu />} />
         <Route path="cart" />

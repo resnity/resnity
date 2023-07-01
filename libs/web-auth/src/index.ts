@@ -8,3 +8,4 @@ export { AuthClient, AuthProvider } from './AuthProvider';
 export type { AuthProviderProps } from './AuthProvider';
 
 export { LoginPage } from './LoginPage';
+export { LogoutPage } from './LogoutPage';
