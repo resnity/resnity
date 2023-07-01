@@ -1,6 +1,6 @@
 version: 1
 applications:
-  - appRoot: apps/web
+  - appRoot: apps/web-dashboard
     frontend:
       buildPath: /
       phases:
@@ -9,9 +9,26 @@ applications:
             - npm ci
         build:
           commands:
-            - npx nx build web --prod
+            - npx nx build web-dashboard --prod
       artifacts:
-        baseDirectory: dist/apps/web
+        baseDirectory: dist/apps/web-dashboard
+        files:
+          - '**/*'
+      cache:
+        paths:
+          - node_modules/**/*
+  - appRoot: apps/web-platform
+    frontend:
+      buildPath: /
+      phases:
+        preBuild:
+          commands:
+            - npm ci
+        build:
+          commands:
+            - npx nx build web-platform --prod
+      artifacts:
+        baseDirectory: dist/apps/web-platform
         files:
           - '**/*'
       cache:
