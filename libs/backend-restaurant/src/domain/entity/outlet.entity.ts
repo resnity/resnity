@@ -2,45 +2,43 @@ import { AutoMap } from '@automapper/classes';
 
 import {
   BaseEntityPayload,
+  DomainError,
   Entity,
   createEntityId,
   extractMapValues,
   mapClassInstancesToMapBy,
 } from '@resnity/backend-common';
 
+import { MenuId, assertMenuIdsValid } from '../common/menu.types';
+import { OrderId, assertOrderIdsValid } from '../common/order.types';
+import { RestaurantErrorCode } from '../restaurant.errors';
 import { Address } from '../value-object/address.value-object';
 import { Contact } from '../value-object/contact.value-object';
 import { ServiceSchedule } from '../value-object/service-schedule.value-object';
 import {
   CreateOutletPayload,
-  OutletAddress,
-  OutletContact,
   OutletId,
-  OutletMenuId,
   OutletName,
-  OutletOrderId,
-  OutletServiceSchedule,
-  OutletTable,
   UpdateOutletPayload,
-  assertOutletAddressValid,
-  assertOutletContactValid,
   assertOutletIdValid,
-  assertOutletMenuIdsValid,
   assertOutletNameValid,
-  assertOutletOrderIdsValid,
-  assertOutletServiceScheduleValid,
 } from './outlet.entity.types';
 import { Table } from './table.entity';
-import { TableId } from './table.entity.types';
+import {
+  CreateTablePayload,
+  TableId,
+  UpdateTablePayload,
+  assertTableIdValid,
+} from './table.entity.types';
 
 export class Outlet extends Entity<OutletId> {
-  private _menuIds: Set<OutletMenuId>;
-  private _orderIds: Set<OutletOrderId>;
+  private _menuIds: Set<MenuId>;
+  private _orderIds: Set<OrderId>;
   private _name: OutletName;
-  private _tables: Map<TableId, OutletTable>;
-  private _address: OutletAddress;
-  private _contact: OutletContact;
-  private _serviceSchedule: OutletServiceSchedule;
+  private _tables: Map<TableId, Table>;
+  private _address: Address;
+  private _contact: Contact;
+  private _serviceSchedule: ServiceSchedule;
 
   static create(payload: CreateOutletPayload) {
     return Outlet.new({
@@ -52,17 +50,10 @@ export class Outlet extends Entity<OutletId> {
   }
 
   static new(payload: BaseEntityPayload<CreateOutletPayload>) {
-    const address = Address.create(payload.address);
-    const contact = Contact.create(payload.contact);
-    const serviceSchedule = ServiceSchedule.create(payload.serviceSchedule);
-
     assertOutletIdValid(payload.id);
-    assertOutletMenuIdsValid(payload.menuIds);
-    assertOutletOrderIdsValid(payload.orderIds);
+    assertMenuIdsValid(payload.menuIds);
+    assertOrderIdsValid(payload.orderIds);
     assertOutletNameValid(payload.name);
-    assertOutletAddressValid(address);
-    assertOutletContactValid(contact);
-    assertOutletServiceScheduleValid(serviceSchedule);
 
     const outlet = new Outlet();
     outlet.id = payload.id;
@@ -70,19 +61,19 @@ export class Outlet extends Entity<OutletId> {
     outlet.orderIds = payload.orderIds;
     outlet.name = payload.name;
     outlet.tables = [];
-    outlet.address = address;
-    outlet.contact = contact;
-    outlet.serviceSchedule = serviceSchedule;
+    outlet.address = Address.create(payload.address);
+    outlet.contact = Contact.create(payload.contact);
+    outlet.serviceSchedule = ServiceSchedule.create(payload.serviceSchedule);
     return outlet;
   }
 
   update(payload: UpdateOutletPayload) {
     if (payload.menuIds) {
-      assertOutletMenuIdsValid(payload.menuIds);
+      assertMenuIdsValid(payload.menuIds);
       this.menuIds = payload.menuIds;
     }
     if (payload.orderIds) {
-      assertOutletOrderIdsValid(payload.orderIds);
+      assertOrderIdsValid(payload.orderIds);
       this.orderIds = payload.orderIds;
     }
     if (payload.name) {
@@ -90,37 +81,67 @@ export class Outlet extends Entity<OutletId> {
       this.name = payload.name;
     }
     if (payload.address) {
-      const address = Address.create(payload.address);
-      assertOutletAddressValid(address);
-      this.address = address;
+      this.address = Address.create(payload.address);
     }
     if (payload.contact) {
-      const contact = Contact.create(payload.contact);
-      assertOutletContactValid(contact);
-      this.contact = contact;
+      this.contact = Contact.create(payload.contact);
     }
     if (payload.serviceSchedule) {
-      const serviceSchedule = ServiceSchedule.create(payload.serviceSchedule);
-      assertOutletServiceScheduleValid(serviceSchedule);
-      this.serviceSchedule = serviceSchedule;
+      this.serviceSchedule = ServiceSchedule.create(payload.serviceSchedule);
     }
 
     this._setUpdatedAtToNow();
   }
 
+  addTable(payload: CreateTablePayload) {
+    const table = Table.create(payload);
+    this._tables.set(table.id, table);
+    this._setUpdatedAtToNow();
+  }
+
+  updateTableById(tableId: string, payload: UpdateTablePayload) {
+    assertTableIdValid(tableId);
+    const table = this._getTableById(tableId);
+    table.update(payload);
+    this._setUpdatedAtToNow();
+  }
+
+  removeTableById(tableId: string) {
+    assertTableIdValid(tableId);
+    this._getTableById(tableId);
+    this._tables.delete(tableId);
+    this._setUpdatedAtToNow();
+  }
+
+  private _getTableById(tableId: TableId) {
+    const result = this._tables.get(tableId);
+    if (result === undefined)
+      throw DomainError.ofCode(
+        RestaurantErrorCode.RESTAURANT_OUTLET_TABLE_DOES_NOT_EXISTS,
+      );
+    return result;
+  }
+
+  private _assertTableDoesNotExists(tableId: TableId) {
+    if (this._tables.has(tableId))
+      throw DomainError.ofCode(
+        RestaurantErrorCode.RESTAURANT_OUTLET_TABLE_ALREADY_EXISTS,
+      );
+  }
+
   @AutoMap(() => [String])
-  get menuIds(): OutletMenuId[] {
+  get menuIds(): MenuId[] {
     return Array.from(this._menuIds);
   }
-  set menuIds(value: OutletMenuId[]) {
+  set menuIds(value: MenuId[]) {
     this._menuIds = new Set(value);
   }
 
   @AutoMap(() => [String])
-  get orderIds(): OutletOrderId[] {
+  get orderIds(): OrderId[] {
     return Array.from(this._orderIds);
   }
-  set orderIds(value: OutletOrderId[]) {
+  set orderIds(value: OrderId[]) {
     this._orderIds = new Set(value);
   }
 
@@ -133,34 +154,34 @@ export class Outlet extends Entity<OutletId> {
   }
 
   @AutoMap(() => [Table])
-  get tables(): OutletTable[] {
+  get tables(): Table[] {
     return extractMapValues(this._tables);
   }
-  set tables(value: OutletTable[]) {
+  set tables(value: Table[]) {
     this._tables = mapClassInstancesToMapBy(value, 'id');
   }
 
   @AutoMap(() => Address)
-  get address(): OutletAddress {
+  get address(): Address {
     return this._address;
   }
-  set address(value: OutletAddress) {
+  set address(value: Address) {
     this._address = value;
   }
 
   @AutoMap(() => Contact)
-  get contact(): OutletContact {
+  get contact(): Contact {
     return this._contact;
   }
-  set contact(value: OutletContact) {
+  set contact(value: Contact) {
     this._contact = value;
   }
 
   @AutoMap(() => ServiceSchedule)
-  get serviceSchedule(): OutletServiceSchedule {
+  get serviceSchedule(): ServiceSchedule {
     return this._serviceSchedule;
   }
-  set serviceSchedule(value: OutletServiceSchedule) {
+  set serviceSchedule(value: ServiceSchedule) {
     this._serviceSchedule = value;
   }
 }

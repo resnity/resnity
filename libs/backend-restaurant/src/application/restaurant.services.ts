@@ -14,8 +14,10 @@ import {
 import {
   CreateOutletServicePayload,
   CreateRestaurantServicePayload,
+  CreateTableServicePayload,
   UpdateOutletServicePayload,
   UpdateRestaurantServicePayload,
+  UpdateTableServicePayload,
 } from './restaurant.services.types';
 
 export const RESTAURANT_SERVICE_TOKEN = Symbol('RESTAURANT_SERVICE_TOKEN');
@@ -42,6 +44,23 @@ export interface RestaurantServices {
     payload: UpdateOutletServicePayload,
   ): Promise<Restaurant>;
   removeOutletById(restaurantId: string, outletId: string): Promise<void>;
+
+  createTable(
+    restaurantId: string,
+    outletId: string,
+    payload: CreateTableServicePayload,
+  ): Promise<Restaurant>;
+  updateTableById(
+    restaurantId: string,
+    outletId: string,
+    tableId: string,
+    payload: UpdateTableServicePayload,
+  ): Promise<Restaurant>;
+  removeTableById(
+    restaurantId: string,
+    outletId: string,
+    tableId: string,
+  ): Promise<void>;
 }
 
 export class RestaurantServiceImpl implements RestaurantServices {
@@ -130,6 +149,53 @@ export class RestaurantServiceImpl implements RestaurantServices {
   async removeOutletById(restaurantId: string, outletId: string) {
     const restaurant = await this._getRestaurantById(restaurantId);
     restaurant.removeOutletById(outletId);
+
+    await this._repository.withTransaction(async () => {
+      await this._repository.update(restaurant);
+      await restaurant.publishEvents(this._eventEmitter);
+    });
+  }
+
+  async createTable(
+    restaurantId: string,
+    outletId: string,
+    payload: CreateTableServicePayload,
+  ) {
+    const restaurant = await this._getRestaurantById(restaurantId);
+    restaurant.addTable(outletId, payload);
+
+    await this._repository.withTransaction(async () => {
+      await this._repository.update(restaurant);
+      await restaurant.publishEvents(this._eventEmitter);
+    });
+
+    return restaurant;
+  }
+
+  async updateTableById(
+    restaurantId: string,
+    outletId: string,
+    tableId: string,
+    payload: UpdateTableServicePayload,
+  ) {
+    const restaurant = await this._getRestaurantById(restaurantId);
+    restaurant.updateTableById(outletId, tableId, payload);
+
+    await this._repository.withTransaction(async () => {
+      await this._repository.update(restaurant);
+      await restaurant.publishEvents(this._eventEmitter);
+    });
+
+    return restaurant;
+  }
+
+  async removeTableById(
+    restaurantId: string,
+    outletId: string,
+    tableId: string,
+  ) {
+    const restaurant = await this._getRestaurantById(restaurantId);
+    restaurant.removeTableById(outletId, tableId);
 
     await this._repository.withTransaction(async () => {
       await this._repository.update(restaurant);

@@ -53,7 +53,6 @@ export class Table extends Entity<TableId> {
       assertTableCapacityValid(payload.capacity);
       this.capacity = payload.capacity;
     }
-
     this._setUpdatedAtToNow();
   }
 
