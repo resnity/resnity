@@ -35,7 +35,11 @@ export {
   extractMapValues,
   mapClassInstancesToMapBy,
 } from './libs/transforms';
-export { validateOrThrowDomainError } from './libs/validator';
+export {
+  domainSchemaValidatorBuilder,
+  validateOrThrowDomainError,
+} from './libs/validator';
+export type { Validate } from './libs/validator';
 
 export { AppClsModule } from './modules/app-cls/app-cls.module';
 export { AppClsService } from './modules/app-cls/app-cls.service';

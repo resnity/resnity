@@ -3,10 +3,7 @@
   "tabWidth": 2,
   "singleQuote": true,
   "trailingComma": "all",
-  "plugins": [
-    "@trivago/prettier-plugin-sort-imports",
-    "prettier-plugin-tailwindcss"
-  ],
+  "plugins": ["@trivago/prettier-plugin-sort-imports"],
   "importOrder": ["<THIRD_PARTY_MODULES>", "^@resnity/(.*)$", "^[./]"],
   "importOrderSeparation": true,
   "importOrderSortSpecifiers": true,
@@ -15,6 +12,5 @@
     "typescript",
     "classProperties",
     "decorators-legacy"
-  ],
-  "tailwindFunctions": ["tw"]
+  ]
 }
