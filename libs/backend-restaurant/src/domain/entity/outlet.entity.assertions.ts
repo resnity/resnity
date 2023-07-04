@@ -15,41 +15,52 @@ import {
 } from './outlet.entity.types';
 import { Table } from './table.entity';
 
-type AssertOutletId = (value: string) => asserts value is OutletId;
-export const assertOutletId: AssertOutletId = (value: string) =>
+type AssertOutletIdValid = (value: string) => asserts value is OutletId;
+export const assertOutletIdValid: AssertOutletIdValid = (value: string) =>
   validateOrThrowDomainError(OutletId, value);
 
-type AssertOutletOrderIds = (
+type AssertOutletOrderIdsValid = (
   values: string[],
 ) => asserts values is OutletOrderId[];
-export const assertOutletOrderIds: AssertOutletOrderIds = (values: string[]) =>
-  validateOrThrowDomainError(OutletOrderId.array(), values);
+export const assertOutletOrderIdsValid: AssertOutletOrderIdsValid = (
+  values: string[],
+) => validateOrThrowDomainError(OutletOrderId.array(), values);
 
-type AssertOutletMenuIds = (
+type AssertOutletMenuIdsValid = (
   values: string[],
 ) => asserts values is OutletMenuId[];
-export const assertOutletMenuIds: AssertOutletMenuIds = (values: string[]) =>
-  validateOrThrowDomainError(OutletMenuId.array(), values);
+export const assertOutletMenuIdsValid: AssertOutletMenuIdsValid = (
+  values: string[],
+) => validateOrThrowDomainError(OutletMenuId.array(), values);
 
-type AssertOutletName = (value: string) => asserts value is OutletName;
-export const assertOutletName: AssertOutletName = (value: string) =>
+type AssertOutletNameValid = (value: string) => asserts value is OutletName;
+export const assertOutletNameValid: AssertOutletNameValid = (value: string) =>
   validateOrThrowDomainError(OutletName, value);
 
-type AssertOutletTables = (values: Table[]) => asserts values is OutletTable[];
-export const assertOutletTables: AssertOutletTables = (values: Table[]) =>
-  validateOrThrowDomainError(OutletTable, values);
+type AssertOutletTablesValid = (
+  values: Table[],
+) => asserts values is OutletTable[];
+export const assertOutletTablesValid: AssertOutletTablesValid = (
+  values: Table[],
+) => validateOrThrowDomainError(OutletTable, values);
 
-type AssertOutletAddress = (value: Address) => asserts value is OutletAddress;
-export const assertOutletAddress: AssertOutletAddress = (value: Address) =>
-  validateOrThrowDomainError(OutletAddress, value);
+type AssertOutletAddressValid = (
+  value: Address,
+) => asserts value is OutletAddress;
+export const assertOutletAddressValid: AssertOutletAddressValid = (
+  value: Address,
+) => validateOrThrowDomainError(OutletAddress, value);
 
-type AssertOutletContact = (value: Contact) => asserts value is OutletContact;
-export const assertOutletContact: AssertOutletContact = (value: Contact) =>
-  validateOrThrowDomainError(OutletContact, value);
+type AssertOutletContactValid = (
+  value: Contact,
+) => asserts value is OutletContact;
+export const assertOutletContactValid: AssertOutletContactValid = (
+  value: Contact,
+) => validateOrThrowDomainError(OutletContact, value);
 
-type AssertOutletServiceSchedule = (
+type AssertOutletServiceScheduleValid = (
   value: ServiceSchedule,
 ) => asserts value is OutletServiceSchedule;
-export const assertOutletServiceSchedule: AssertOutletServiceSchedule = (
-  value: ServiceSchedule,
-) => validateOrThrowDomainError(OutletServiceSchedule, value);
+export const assertOutletServiceScheduleValid: AssertOutletServiceScheduleValid =
+  (value: ServiceSchedule) =>
+    validateOrThrowDomainError(OutletServiceSchedule, value);

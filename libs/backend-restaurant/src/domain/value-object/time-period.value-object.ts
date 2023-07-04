@@ -3,8 +3,8 @@ import { AutoMap } from '@automapper/classes';
 import { ValueObject } from '@resnity/backend-common';
 
 import {
-  assertTimePeriodEndTime,
-  assertTimePeriodStartTime,
+  assertTimePeriodEndTimeValid,
+  assertTimePeriodStartTimeValid,
 } from './time-period.value-object.assertions';
 import {
   CreateTimePeriodPayload,
@@ -28,8 +28,8 @@ export class TimePeriod extends ValueObject {
   }
 
   static new(payload: CreateTimePeriodPayload) {
-    assertTimePeriodStartTime(payload.startTime);
-    assertTimePeriodEndTime(payload.endTime);
+    assertTimePeriodStartTimeValid(payload.startTime);
+    assertTimePeriodEndTimeValid(payload.endTime);
 
     const timePeriod = new TimePeriod();
     timePeriod.startTime = payload.startTime;

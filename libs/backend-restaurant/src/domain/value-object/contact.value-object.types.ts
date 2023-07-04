@@ -12,5 +12,5 @@ export type ContactEmail = z.infer<typeof ContactEmail>;
 
 export type CreateContactPayload = {
   phoneNumber: string;
-  email: string;
+  email?: string;
 };

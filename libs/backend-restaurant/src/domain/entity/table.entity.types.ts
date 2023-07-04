@@ -20,3 +20,8 @@ export type CreateTablePayload = {
   code: string;
   capacity: number;
 };
+
+export type UpdateTablePayload = {
+  code?: string;
+  capacity?: number;
+};

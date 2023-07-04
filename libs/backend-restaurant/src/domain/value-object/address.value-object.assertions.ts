@@ -10,41 +10,47 @@ import {
   AddressState,
 } from './address.value-object.types';
 
-type AssertAddressLine1 = (value: string) => asserts value is AddressLine1;
-export const assertAddressLine1: AssertAddressLine1 = (value: string) =>
-  validateOrThrowDomainError(AddressLine1, value);
+type AssertAddressLine1Valid = (value: string) => asserts value is AddressLine1;
+export const assertAddressLine1Valid: AssertAddressLine1Valid = (
+  value: string,
+) => validateOrThrowDomainError(AddressLine1, value);
 
-type AssertOptionalAddressLine2 = (
+type AssertMaybeAddressLine2Valid = (
   value?: string,
 ) => asserts value is AddressLine2 | undefined;
-export const assertOptionalAddressLine2: AssertOptionalAddressLine2 = (
+export const assertMaybeAddressLine2Valid: AssertMaybeAddressLine2Valid = (
   value?: string,
 ) => validateOrThrowDomainError(AddressLine2.optional(), value);
 
-type AssertOptionalAddressLine3 = (
+type AssertMaybeAddressLine3Valid = (
   value?: string,
 ) => asserts value is AddressLine3 | undefined;
-export const assertOptionalAddressLine3: AssertOptionalAddressLine3 = (
+export const assertMaybeAddressLine3Valid: AssertMaybeAddressLine3Valid = (
   value?: string,
 ) => validateOrThrowDomainError(AddressLine3.optional(), value);
 
-type AssertAddressPostcode = (
+type AssertAddressPostcodeValid = (
   value: string,
 ) => asserts value is AddressPostcode;
-export const assertAddressPostcode: AssertAddressPostcode = (value: string) =>
-  validateOrThrowDomainError(AddressPostcode, value);
+export const assertAddressPostcodeValid: AssertAddressPostcodeValid = (
+  value: string,
+) => validateOrThrowDomainError(AddressPostcode, value);
 
-type AssertOptionalAddressCity = (
+type AssertMaybeAddressCityValid = (
   value?: string,
 ) => asserts value is AddressCity | undefined;
-export const assertOptionalAddressCity: AssertOptionalAddressCity = (
+export const assertMaybeAddressCityValid: AssertMaybeAddressCityValid = (
   value?: string,
 ) => validateOrThrowDomainError(AddressCity.optional(), value);
 
-type AssertAddressState = (value: string) => asserts value is AddressState;
-export const assertAddressState: AssertAddressState = (value: string) =>
-  validateOrThrowDomainError(AddressState, value);
+type AssertAddressStateValid = (value: string) => asserts value is AddressState;
+export const assertAddressStateValid: AssertAddressStateValid = (
+  value: string,
+) => validateOrThrowDomainError(AddressState, value);
 
-type AssertAddressCountry = (value: string) => asserts value is AddressCountry;
-export const assertAddressCountry: AssertAddressCountry = (value: string) =>
-  validateOrThrowDomainError(AddressCountry, value);
+type AssertAddressCountryValid = (
+  value: string,
+) => asserts value is AddressCountry;
+export const assertAddressCountryValid: AssertAddressCountryValid = (
+  value: string,
+) => validateOrThrowDomainError(AddressCountry, value);

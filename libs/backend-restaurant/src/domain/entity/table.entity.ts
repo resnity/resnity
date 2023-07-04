@@ -7,15 +7,16 @@ import {
 } from '@resnity/backend-common';
 
 import {
-  assertTableCapacity,
-  assertTableCode,
-  assertTableId,
+  assertTableCapacityValid,
+  assertTableCodeValid,
+  assertTableIdValid,
 } from './table.entity.assertions';
 import {
   CreateTablePayload,
   TableCapacity,
   TableCode,
   TableId,
+  UpdateTablePayload,
 } from './table.entity.types';
 
 export class Table extends Entity<TableId> {
@@ -32,9 +33,9 @@ export class Table extends Entity<TableId> {
   }
 
   static new(payload: BaseEntityPayload<CreateTablePayload>) {
-    assertTableId(payload.id);
-    assertTableCode(payload.code);
-    assertTableCapacity(payload.capacity);
+    assertTableIdValid(payload.id);
+    assertTableCodeValid(payload.code);
+    assertTableCapacityValid(payload.capacity);
 
     const table = new Table();
     table.createdAt = payload.createdAt;
@@ -43,6 +44,19 @@ export class Table extends Entity<TableId> {
     table.code = payload.code;
     table.capacity = payload.capacity;
     return table;
+  }
+
+  update(payload: UpdateTablePayload) {
+    if (payload.code) {
+      assertTableCodeValid(payload.code);
+      this.code = payload.code;
+    }
+    if (payload.capacity) {
+      assertTableCapacityValid(payload.capacity);
+      this.capacity = payload.capacity;
+    }
+
+    this._setUpdatedAtToNow();
   }
 
   @AutoMap()
