@@ -45,3 +45,13 @@ export type UpdateOutletServicePayload = {
   contact?: CreateContactServicePayload;
   serviceSchedule?: CreateServiceScheduleServicePayload;
 };
+
+export type CreateTableServicePayload = {
+  code: string;
+  capacity: number;
+};
+
+export type UpdateTableServicePayload = {
+  code?: string;
+  capacity?: number;
+};

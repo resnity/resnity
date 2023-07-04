@@ -37,7 +37,7 @@ export class RestaurantEventHandlersImpl implements RestaurantEventHandlers {
 
   private _addMenuId(restaurant: Restaurant, menuId: string) {
     try {
-      restaurant.addMenuId(menuId);
+      restaurant.addMenu(menuId);
     } catch (err) {
       throw AppError.fromDomain(err as DomainError);
     }
