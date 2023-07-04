@@ -1,11 +1,15 @@
-import { Body, Controller, Get, Inject, Post, Req } from '@nestjs/common';
-import { Request } from 'express';
-
 import {
-  Auth,
-  Permission,
-  extractUserFromRequest,
-} from '@resnity/backend-auth';
+  Body,
+  Controller,
+  Get,
+  Inject,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
+
+import { Auth, Permission } from '@resnity/backend-auth';
+import { HttpResponse } from '@resnity/backend-common';
 
 import {
   RESTAURANT_SERVICE_TOKEN,
@@ -15,8 +19,10 @@ import {
   RESTAURANT_MAPPER_TOKEN,
   RestaurantMapper,
 } from '../infrastructure/restaurant.mapper';
-import { CreateRestaurantRequestBody } from './restaurant.dtos';
-
+import {
+  CreateRestaurantRequestBody,
+  UpdateRestaurantRequestBody,
+} from './restaurant.dtos';
 
 @Controller('restaurants')
 export class RestaurantController {
@@ -30,22 +36,33 @@ export class RestaurantController {
   @Get()
   async getRestaurants() {
     const restaurants = await this._services.getRestaurants();
-    return this._mapper.toResponseDtos(restaurants);
+    const dtos = this._mapper.toResponseDtos(restaurants);
+    return HttpResponse.ok(dtos);
   }
 
-  @Auth({
-    requiredPermissions: [Permission.WRITE_RESTAURANT],
-  })
+  @Auth({ requiredPermissions: [Permission.WRITE_RESTAURANT] })
   @Post()
-  async createRestaurant(
-    @Req() request: Request,
-    @Body() body: CreateRestaurantRequestBody,
+  async createRestaurant(@Body() body: CreateRestaurantRequestBody) {
+    const restaurant = await this._services.createRestaurant(body);
+    const dto = this._mapper.toResponseDto(restaurant);
+    return HttpResponse.ok(dto);
+  }
+
+  @Auth({ requiredPermissions: [Permission.WRITE_RESTAURANT] })
+  @Patch(':id')
+  async updateRestaurantById(
+    @Param('id') id: string,
+    @Body() body: UpdateRestaurantRequestBody,
   ) {
-    const user = await extractUserFromRequest(request);
-    const restaurantId = await this._services.createRestaurant({
-      name: body.name,
-      userId: user.sub,
-    });
-    return { id: restaurantId };
+    const restaurant = await this._services.updateRestaurantById(id, body);
+    const dto = this._mapper.toResponseDto(restaurant);
+    return HttpResponse.ok(dto);
+  }
+
+  @Auth({ requiredPermissions: [Permission.WRITE_RESTAURANT] })
+  @Post(':id')
+  async removeRestaurantById(@Param('id') id: string) {
+    await this._services.removeRestaurantById(id);
+    return HttpResponse.ok();
   }
 }

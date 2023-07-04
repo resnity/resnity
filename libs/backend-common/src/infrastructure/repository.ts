@@ -18,6 +18,8 @@ export interface Repository<
 
   update(entity: TEntity): Promise<void>;
 
+  remove(entity: TEntity): Promise<void>;
+
   withTransaction<T>(fn: () => Promise<T>): Promise<T>;
 }
 
@@ -67,6 +69,11 @@ export class RepositoryImpl<
 
     const tenantAwareModel = { ...model, tenantId };
     await this._collection.replaceOne({ _id: idFilter }, tenantAwareModel);
+  }
+
+  async remove(entity: TEntity) {
+    const idFilter: Filter<TModel>['_id'] = entity.id;
+    await this._collection.deleteOne({ _id: idFilter });
   }
 
   async withTransaction<T>(fn: () => Promise<T>): Promise<T> {
