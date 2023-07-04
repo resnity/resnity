@@ -37,8 +37,16 @@ export type CreateOutletPayload = {
   menuIds: string[];
   orderIds: string[];
   name: string;
-  tables: Table[];
   address: Address;
   contact: Contact;
   serviceSchedule: ServiceSchedule;
+};
+
+export type UpdateOutletPayload = {
+  menuIds?: string[];
+  orderIds?: string[];
+  name?: string;
+  address?: Address;
+  contact?: Contact;
+  serviceSchedule?: ServiceSchedule;
 };

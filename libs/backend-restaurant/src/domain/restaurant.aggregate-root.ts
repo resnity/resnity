@@ -10,20 +10,20 @@ import {
 } from '@resnity/backend-common';
 
 import { Outlet } from './entity/outlet.entity';
-import { OutletId } from './entity/outlet.entity.types';
-import {
-  assertRestaurantId,
-  assertRestaurantMenuId,
-  assertRestaurantMenuIds,
-  assertRestaurantName,
-  assertRestaurantOutlets,
-} from './restaurant.aggregate-root.assertions';
+import { assertOutletIdValid } from './entity/outlet.entity.assertions';
+import { OutletId, UpdateOutletPayload } from './entity/outlet.entity.types';
 import {
   CreateRestaurantPayload,
   RestaurantId,
   RestaurantMenuId,
   RestaurantName,
   RestaurantOutlet,
+  UpdateRestaurantPayload,
+  assertRestaurantIdValid,
+  assertRestaurantMenuIdValid,
+  assertRestaurantMenuIdsValid,
+  assertRestaurantNameValid,
+  assertRestaurantOutletValid,
 } from './restaurant.aggregate-root.types';
 import { RestaurantErrorCode } from './restaurant.errors';
 import { RestaurantCreatedEvent } from './restaurant.events';
@@ -52,10 +52,9 @@ export class Restaurant extends AggregateRoot<RestaurantId> {
   }
 
   static new(payload: BaseEntityPayload<CreateRestaurantPayload>) {
-    assertRestaurantId(payload.id);
-    assertRestaurantName(payload.name);
-    assertRestaurantMenuIds(payload.menuIds);
-    assertRestaurantOutlets(payload.outlets);
+    assertRestaurantIdValid(payload.id);
+    assertRestaurantNameValid(payload.name);
+    assertRestaurantMenuIdsValid(payload.menuIds);
 
     const restaurant = new Restaurant();
     restaurant.id = payload.id;
@@ -63,25 +62,70 @@ export class Restaurant extends AggregateRoot<RestaurantId> {
     restaurant.updatedAt = payload.updatedAt;
     restaurant.name = payload.name;
     restaurant.menuIds = payload.menuIds;
-    restaurant.outlets = payload.outlets;
+    restaurant.outlets = [];
     return restaurant;
   }
 
-  addMenuId(menuId: string) {
-    assertRestaurantMenuId(menuId);
-    this._addMenuId(menuId);
+  update(payload: UpdateRestaurantPayload) {
+    if (payload.menuIds !== undefined) {
+      assertRestaurantMenuIdsValid(payload.menuIds);
+      this._menuIds = new Set(payload.menuIds);
+    }
+    if (payload.name !== undefined) {
+      assertRestaurantNameValid(payload.name);
+      this._name = payload.name;
+    }
     this._setUpdatedAtToNow();
   }
 
-  private _addMenuId(menuId: RestaurantMenuId) {
-    this._assertMenuIdDoesNotExists(menuId);
+  addMenuId(menuId: string) {
+    assertRestaurantMenuIdValid(menuId);
+    this._assertMenuDoesNotExists(menuId);
     this._menuIds.add(menuId);
+    this._setUpdatedAtToNow();
   }
 
-  private _assertMenuIdDoesNotExists(menuId: RestaurantMenuId) {
+  addOutlet(outlet: Outlet) {
+    assertRestaurantOutletValid(outlet);
+    this._assertOutletDoesNotExists(outlet);
+    this._outlets.set(outlet.id, outlet);
+    this._setUpdatedAtToNow();
+  }
+
+  updateOutletById(id: string, payload: UpdateOutletPayload) {
+    assertOutletIdValid(id);
+    const outlet = this._getOutletById(id);
+    outlet.update(payload);
+    this._setUpdatedAtToNow();
+  }
+
+  private _getOutletById(id: OutletId) {
+    const outlet = this._outlets.get(id);
+    if (outlet === undefined)
+      throw DomainError.ofCode(
+        RestaurantErrorCode.RESTAURANT_OUTLET_DOES_NOT_EXISTS,
+      );
+    return outlet;
+  }
+
+  private _assertMenuDoesNotExists(menuId: RestaurantMenuId) {
     if (this._menuIds.has(menuId))
       throw DomainError.ofCode(
         RestaurantErrorCode.RESTAURANT_MENU_ALREADY_EXISTS,
+      );
+  }
+
+  private _assertOutletDoesNotExists(outlet: Outlet) {
+    if (this._outlets.has(outlet.id))
+      throw DomainError.ofCode(
+        RestaurantErrorCode.RESTAURANT_OUTLET_ALREADY_EXISTS,
+      );
+  }
+
+  private _assertOutletExists(outletId: OutletId) {
+    if (!this._outlets.has(outletId))
+      throw DomainError.ofCode(
+        RestaurantErrorCode.RESTAURANT_OUTLET_DOES_NOT_EXISTS,
       );
   }
 

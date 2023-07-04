@@ -2,6 +2,11 @@ import { AutoMap } from '@automapper/classes';
 
 import { EmbeddedResponseDto, ResponseDto } from '@resnity/backend-common';
 
+import {
+  CreateRestaurantServicePayload,
+  UpdateRestaurantServicePayload,
+} from '../application/restaurant.services.types';
+
 export class AddressResponseDto extends EmbeddedResponseDto {
   @AutoMap()
   readonly line1: string;
@@ -85,7 +90,18 @@ export class RestaurantResponseDto extends ResponseDto {
   readonly outlets: OutletResponseDto[];
 }
 
-export class CreateRestaurantRequestBody {
+export class CreateRestaurantRequestBody
+  implements CreateRestaurantServicePayload
+{
   @AutoMap()
   readonly name: string;
+}
+
+export class UpdateRestaurantRequestBody
+  implements UpdateRestaurantServicePayload
+{
+  @AutoMap(() => [String])
+  readonly menuIds?: string[];
+  @AutoMap()
+  readonly name?: string;
 }

@@ -47,3 +47,35 @@ export const validateOrThrowDomainError: ValidateOrThrowDomainError = <
   if (!result.success)
     throw new DomainError(mapZodErrorToDomainErrorPayload(result.error));
 };
+
+export type Validate<TSchema extends z.ZodTypeAny> = (
+  input: unknown,
+) => asserts input is z.infer<TSchema>;
+
+export type SchemaValidatorErrorHandler = (error: z.ZodError) => void;
+
+export type SchemaValidatorBuilder = <TSchema extends z.ZodTypeAny>(
+  schema: TSchema,
+  onError: SchemaValidatorErrorHandler,
+) => Validate<TSchema>;
+
+export const schemaValidatorBuilder: SchemaValidatorBuilder =
+  <TSchema extends z.ZodTypeAny>(
+    schema: TSchema,
+    onError: SchemaValidatorErrorHandler,
+  ) =>
+  (input: unknown) => {
+    const result = schema.safeParse(input);
+    if (!result.success) onError(result.error);
+  };
+
+export type DomainSchemaValidatorBuilder = <TSchema extends z.ZodTypeAny>(
+  schema: TSchema,
+) => Validate<TSchema>;
+
+export const domainSchemaValidatorBuilder: DomainSchemaValidatorBuilder =
+  <TSchema extends z.ZodTypeAny>(schema: TSchema) =>
+  (input: unknown) =>
+    schemaValidatorBuilder(schema, (error) => {
+      throw new DomainError(mapZodErrorToDomainErrorPayload(error));
+    })(input);

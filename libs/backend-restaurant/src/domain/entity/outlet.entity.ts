@@ -12,14 +12,13 @@ import { Address } from '../value-object/address.value-object';
 import { Contact } from '../value-object/contact.value-object';
 import { ServiceSchedule } from '../value-object/service-schedule.value-object';
 import {
-  assertOutletAddress,
-  assertOutletContact,
-  assertOutletId,
-  assertOutletMenuIds,
-  assertOutletName,
-  assertOutletOrderIds,
-  assertOutletServiceSchedule,
-  assertOutletTables,
+  assertOutletAddressValid,
+  assertOutletContactValid,
+  assertOutletIdValid,
+  assertOutletMenuIdsValid,
+  assertOutletNameValid,
+  assertOutletOrderIdsValid,
+  assertOutletServiceScheduleValid,
 } from './outlet.entity.assertions';
 import {
   CreateOutletPayload,
@@ -31,6 +30,7 @@ import {
   OutletOrderId,
   OutletServiceSchedule,
   OutletTable,
+  UpdateOutletPayload,
 } from './outlet.entity.types';
 import { Table } from './table.entity';
 import { TableId } from './table.entity.types';
@@ -54,25 +54,53 @@ export class Outlet extends Entity<OutletId> {
   }
 
   static new(payload: BaseEntityPayload<CreateOutletPayload>) {
-    assertOutletId(payload.id);
-    assertOutletMenuIds(payload.menuIds);
-    assertOutletOrderIds(payload.orderIds);
-    assertOutletName(payload.name);
-    assertOutletTables(payload.tables);
-    assertOutletAddress(payload.address);
-    assertOutletContact(payload.contact);
-    assertOutletServiceSchedule(payload.serviceSchedule);
+    assertOutletIdValid(payload.id);
+    assertOutletMenuIdsValid(payload.menuIds);
+    assertOutletOrderIdsValid(payload.orderIds);
+    assertOutletNameValid(payload.name);
+    assertOutletAddressValid(payload.address);
+    assertOutletContactValid(payload.contact);
+    assertOutletServiceScheduleValid(payload.serviceSchedule);
 
     const outlet = new Outlet();
     outlet.id = payload.id;
     outlet.menuIds = payload.menuIds;
     outlet.orderIds = payload.orderIds;
     outlet.name = payload.name;
-    outlet.tables = payload.tables;
+    outlet.tables = [];
     outlet.address = payload.address;
     outlet.contact = payload.contact;
     outlet.serviceSchedule = payload.serviceSchedule;
     return outlet;
+  }
+
+  update(payload: UpdateOutletPayload) {
+    if (payload.menuIds) {
+      assertOutletMenuIdsValid(payload.menuIds);
+      this.menuIds = payload.menuIds;
+    }
+    if (payload.orderIds) {
+      assertOutletOrderIdsValid(payload.orderIds);
+      this.orderIds = payload.orderIds;
+    }
+    if (payload.name) {
+      assertOutletNameValid(payload.name);
+      this.name = payload.name;
+    }
+    if (payload.address) {
+      assertOutletAddressValid(payload.address);
+      this.address = payload.address;
+    }
+    if (payload.contact) {
+      assertOutletContactValid(payload.contact);
+      this.contact = payload.contact;
+    }
+    if (payload.serviceSchedule) {
+      assertOutletServiceScheduleValid(payload.serviceSchedule);
+      this.serviceSchedule = payload.serviceSchedule;
+    }
+
+    this._setUpdatedAtToNow();
   }
 
   @AutoMap(() => [String])

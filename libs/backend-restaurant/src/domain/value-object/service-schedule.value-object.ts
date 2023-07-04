@@ -3,8 +3,8 @@ import { AutoMap } from '@automapper/classes';
 import { ValueObject } from '@resnity/backend-common';
 
 import {
-  assertServiceScheduleName,
-  assertServiceScheduleTimePeriod,
+  assertServiceScheduleNameValid,
+  assertServiceScheduleTimePeriodValid,
 } from './service-schedule.value-object.assertions';
 import {
   CreateServiceSchedulePayload,
@@ -41,14 +41,14 @@ export class ServiceSchedule extends ValueObject {
   }
 
   static new(payload: CreateServiceSchedulePayload) {
-    assertServiceScheduleName(payload.name);
-    assertServiceScheduleTimePeriod(payload.monday);
-    assertServiceScheduleTimePeriod(payload.tuesday);
-    assertServiceScheduleTimePeriod(payload.wednesday);
-    assertServiceScheduleTimePeriod(payload.thursday);
-    assertServiceScheduleTimePeriod(payload.friday);
-    assertServiceScheduleTimePeriod(payload.saturday);
-    assertServiceScheduleTimePeriod(payload.sunday);
+    assertServiceScheduleNameValid(payload.name);
+    assertServiceScheduleTimePeriodValid(payload.monday);
+    assertServiceScheduleTimePeriodValid(payload.tuesday);
+    assertServiceScheduleTimePeriodValid(payload.wednesday);
+    assertServiceScheduleTimePeriodValid(payload.thursday);
+    assertServiceScheduleTimePeriodValid(payload.friday);
+    assertServiceScheduleTimePeriodValid(payload.saturday);
+    assertServiceScheduleTimePeriodValid(payload.sunday);
 
     const serviceSchedule = new ServiceSchedule();
     serviceSchedule.name = payload.name;

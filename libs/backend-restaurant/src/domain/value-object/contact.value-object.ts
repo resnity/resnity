@@ -3,8 +3,8 @@ import { AutoMap } from '@automapper/classes';
 import { ValueObject } from '@resnity/backend-common';
 
 import {
-  assertContactPhoneNumber,
-  assertOptionalEmail,
+  assertContactPhoneNumberValid,
+  assertMaybeEmailValid,
 } from './contact.value-object.assertions';
 import {
   ContactEmail,
@@ -21,8 +21,8 @@ export class Contact extends ValueObject {
   }
 
   static new(payload: CreateContactPayload) {
-    assertContactPhoneNumber(payload.phoneNumber);
-    assertOptionalEmail(payload.email);
+    assertContactPhoneNumberValid(payload.phoneNumber);
+    assertMaybeEmailValid(payload.email);
 
     const contact = new Contact();
     contact.phoneNumber = payload.phoneNumber;

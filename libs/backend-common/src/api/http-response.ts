@@ -22,7 +22,7 @@ export class HttpResponse<T = unknown> {
     this.timestamp = new Date().toISOString();
   }
 
-  static ok<T>(data?: T) {
+  static ok<T = never>(data?: T) {
     return new HttpResponse<T>({
       message: 'Ok',
       status: HttpStatus.OK,
