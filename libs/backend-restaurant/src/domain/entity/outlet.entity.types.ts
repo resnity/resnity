@@ -7,8 +7,11 @@ import {
 } from '@resnity/backend-common';
 
 import { Address } from '../value-object/address.value-object';
+import { CreateAddressPayload } from '../value-object/address.value-object.types';
 import { Contact } from '../value-object/contact.value-object';
+import { CreateContactPayload } from '../value-object/contact.value-object.types';
 import { ServiceSchedule } from '../value-object/service-schedule.value-object';
+import { CreateServiceSchedulePayload } from '../value-object/service-schedule.value-object.types';
 import { Table } from './table.entity';
 
 const outletIdSchema = EntityId.brand<'OutletId'>();
@@ -77,16 +80,16 @@ export type CreateOutletPayload = {
   menuIds: string[];
   orderIds: string[];
   name: string;
-  address: Address;
-  contact: Contact;
-  serviceSchedule: ServiceSchedule;
+  address: CreateAddressPayload;
+  contact: CreateContactPayload;
+  serviceSchedule: CreateServiceSchedulePayload;
 };
 
 export type UpdateOutletPayload = {
   menuIds?: string[];
   orderIds?: string[];
   name?: string;
-  address?: Address;
-  contact?: Contact;
-  serviceSchedule?: ServiceSchedule;
+  address?: CreateAddressPayload;
+  contact?: CreateContactPayload;
+  serviceSchedule?: CreateServiceSchedulePayload;
 };

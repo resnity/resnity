@@ -81,6 +81,10 @@ export class Restaurant extends AggregateRoot<RestaurantId> {
     this._setUpdatedAtToNow();
   }
 
+  remove() {
+    // publish event
+  }
+
   addMenuId(menuId: string) {
     assertRestaurantMenuIdValid(menuId);
     this._assertMenuDoesNotExists(menuId);
@@ -95,15 +99,22 @@ export class Restaurant extends AggregateRoot<RestaurantId> {
     this._setUpdatedAtToNow();
   }
 
-  updateOutletById(id: string, payload: UpdateOutletPayload) {
-    assertOutletIdValid(id);
-    const outlet = this._getOutletById(id);
+  updateOutletById(outletId: string, payload: UpdateOutletPayload) {
+    assertOutletIdValid(outletId);
+    const outlet = this._getOutletById(outletId);
     outlet.update(payload);
     this._setUpdatedAtToNow();
   }
 
-  private _getOutletById(id: OutletId) {
-    const outlet = this._outlets.get(id);
+  removeOutletById(outletId: string) {
+    assertOutletIdValid(outletId);
+    this._getOutletById(outletId);
+    this._outlets.delete(outletId);
+    this._setUpdatedAtToNow();
+  }
+
+  private _getOutletById(outletId: OutletId) {
+    const outlet = this._outlets.get(outletId);
     if (outlet === undefined)
       throw DomainError.ofCode(
         RestaurantErrorCode.RESTAURANT_OUTLET_DOES_NOT_EXISTS,
