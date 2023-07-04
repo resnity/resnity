@@ -7,21 +7,14 @@ import { Outlet } from '../domain/entity/outlet.entity';
 import { CreateOutletPayload } from '../domain/entity/outlet.entity.types';
 import { Restaurant } from '../domain/restaurant.aggregate-root';
 import { CreateRestaurantPayload } from '../domain/restaurant.aggregate-root.types';
-import { Address } from '../domain/value-object/address.value-object';
-import { CreateAddressPayload } from '../domain/value-object/address.value-object.types';
-import { Contact } from '../domain/value-object/contact.value-object';
-import { CreateContactPayload } from '../domain/value-object/contact.value-object.types';
-import { ServiceSchedule } from '../domain/value-object/service-schedule.value-object';
-import { CreateServiceSchedulePayload } from '../domain/value-object/service-schedule.value-object.types';
-import { TimePeriod } from '../domain/value-object/time-period.value-object';
-import { CreateTimePeriodPayload } from '../domain/value-object/time-period.value-object.types';
 import {
   RESTAURANT_REPOSITORY_TOKEN,
   RestaurantRepository,
 } from '../infrastructure/restaurant.repository';
 import {
-  AddOutletServicePayload,
+  CreateOutletServicePayload,
   CreateRestaurantServicePayload,
+  UpdateOutletServicePayload,
   UpdateRestaurantServicePayload,
 } from './restaurant.services.types';
 
@@ -29,15 +22,26 @@ export const RESTAURANT_SERVICE_TOKEN = Symbol('RESTAURANT_SERVICE_TOKEN');
 
 export interface RestaurantServices {
   getRestaurants(): Promise<Restaurant[]>;
+
   createRestaurant(
     payload: CreateRestaurantServicePayload,
   ): Promise<Restaurant>;
   updateRestaurantById(
-    id: string,
+    restaurantId: string,
     payload: UpdateRestaurantServicePayload,
   ): Promise<Restaurant>;
-  removeRestaurantById(id: string): Promise<void>;
-  addOutlet(id: string, payload: AddOutletServicePayload): Promise<string>;
+  removeRestaurantById(restaurantId: string): Promise<void>;
+
+  createOutlet(
+    restaurantId: string,
+    payload: CreateOutletServicePayload,
+  ): Promise<Restaurant>;
+  updateOutletById(
+    restaurantId: string,
+    outletId: string,
+    payload: UpdateOutletServicePayload,
+  ): Promise<Restaurant>;
+  removeOutletById(restaurantId: string, outletId: string): Promise<void>;
 }
 
 export class RestaurantServiceImpl implements RestaurantServices {
@@ -66,10 +70,10 @@ export class RestaurantServiceImpl implements RestaurantServices {
   }
 
   async updateRestaurantById(
-    id: string,
+    restaurantId: string,
     payload: UpdateRestaurantServicePayload,
   ) {
-    const restaurant = await this._getRestaurantById(id);
+    const restaurant = await this._getRestaurantById(restaurantId);
     restaurant.update(payload);
 
     await this._repository.withTransaction(async () => {
@@ -80,32 +84,22 @@ export class RestaurantServiceImpl implements RestaurantServices {
     return restaurant;
   }
 
-  async removeRestaurantById(id: string) {
-    const restaurant = await this._getRestaurantById(id);
-    await this._repository.remove(restaurant);
+  async removeRestaurantById(restaurantId: string) {
+    const restaurant = await this._getRestaurantById(restaurantId);
+    restaurant.remove();
+
+    await this._repository.withTransaction(async () => {
+      await restaurant.publishEvents(this._eventEmitter);
+      await this._repository.remove(restaurant);
+    });
   }
 
-  async addOutlet(id: string, payload: AddOutletServicePayload) {
-    const restaurant = await this._getRestaurantById(id);
-
-    const address = this._createAddress(payload.address);
-    const contact = this._createContact(payload.contact);
-    const serviceSchedule = this._createServiceSchedule({
-      ...payload.serviceSchedule,
-      monday: this._createTimePeriod(payload.serviceSchedule.monday),
-      tuesday: this._createTimePeriod(payload.serviceSchedule.tuesday),
-      wednesday: this._createTimePeriod(payload.serviceSchedule.wednesday),
-      thursday: this._createTimePeriod(payload.serviceSchedule.thursday),
-      friday: this._createTimePeriod(payload.serviceSchedule.friday),
-      saturday: this._createTimePeriod(payload.serviceSchedule.saturday),
-      sunday: this._createTimePeriod(payload.serviceSchedule.sunday),
-    });
-    const outlet = this._createOutlet({
-      ...payload,
-      address,
-      contact,
-      serviceSchedule,
-    });
+  async createOutlet(
+    restaurantId: string,
+    payload: CreateOutletServicePayload,
+  ) {
+    const restaurant = await this._getRestaurantById(restaurantId);
+    const outlet = this._createOutlet(payload);
 
     restaurant.addOutlet(outlet);
 
@@ -114,7 +108,33 @@ export class RestaurantServiceImpl implements RestaurantServices {
       await restaurant.publishEvents(this._eventEmitter);
     });
 
-    return restaurant.id;
+    return restaurant;
+  }
+
+  async updateOutletById(
+    restaurantId: string,
+    outletId: string,
+    payload: UpdateOutletServicePayload,
+  ) {
+    const restaurant = await this._getRestaurantById(restaurantId);
+    restaurant.updateOutletById(outletId, payload);
+
+    await this._repository.withTransaction(async () => {
+      await this._repository.update(restaurant);
+      await restaurant.publishEvents(this._eventEmitter);
+    });
+
+    return restaurant;
+  }
+
+  async removeOutletById(restaurantId: string, outletId: string) {
+    const restaurant = await this._getRestaurantById(restaurantId);
+    restaurant.removeOutletById(outletId);
+
+    await this._repository.withTransaction(async () => {
+      await this._repository.update(restaurant);
+      await restaurant.publishEvents(this._eventEmitter);
+    });
   }
 
   private async _getRestaurantById(id: string) {
@@ -134,38 +154,6 @@ export class RestaurantServiceImpl implements RestaurantServices {
   private _createOutlet(payload: CreateOutletPayload) {
     try {
       return Outlet.create(payload);
-    } catch (err) {
-      throw AppError.fromDomain(err as DomainError);
-    }
-  }
-
-  private _createAddress(payload: CreateAddressPayload) {
-    try {
-      return Address.create(payload);
-    } catch (err) {
-      throw AppError.fromDomain(err as DomainError);
-    }
-  }
-
-  private _createContact(payload: CreateContactPayload) {
-    try {
-      return Contact.create(payload);
-    } catch (err) {
-      throw AppError.fromDomain(err as DomainError);
-    }
-  }
-
-  private _createServiceSchedule(payload: CreateServiceSchedulePayload) {
-    try {
-      return ServiceSchedule.create(payload);
-    } catch (err) {
-      throw AppError.fromDomain(err as DomainError);
-    }
-  }
-
-  private _createTimePeriod(payload: CreateTimePeriodPayload) {
-    try {
-      return TimePeriod.create(payload);
     } catch (err) {
       throw AppError.fromDomain(err as DomainError);
     }

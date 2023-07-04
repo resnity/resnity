@@ -6,6 +6,7 @@ import {
 } from '@resnity/backend-common';
 
 import { TimePeriod } from './time-period.value-object';
+import { CreateTimePeriodPayload } from './time-period.value-object.types';
 
 const serviceScheduleNameSchema = z
   .string()
@@ -33,11 +34,11 @@ export type ServiceScheduleTimePeriod = z.infer<
 
 export type CreateServiceSchedulePayload = {
   name: string;
-  monday: TimePeriod;
-  tuesday: TimePeriod;
-  wednesday: TimePeriod;
-  thursday: TimePeriod;
-  friday: TimePeriod;
-  saturday: TimePeriod;
-  sunday: TimePeriod;
+  monday: CreateTimePeriodPayload;
+  tuesday: CreateTimePeriodPayload;
+  wednesday: CreateTimePeriodPayload;
+  thursday: CreateTimePeriodPayload;
+  friday: CreateTimePeriodPayload;
+  saturday: CreateTimePeriodPayload;
+  sunday: CreateTimePeriodPayload;
 };

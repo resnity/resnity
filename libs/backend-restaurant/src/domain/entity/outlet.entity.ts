@@ -52,13 +52,17 @@ export class Outlet extends Entity<OutletId> {
   }
 
   static new(payload: BaseEntityPayload<CreateOutletPayload>) {
+    const address = Address.create(payload.address);
+    const contact = Contact.create(payload.contact);
+    const serviceSchedule = ServiceSchedule.create(payload.serviceSchedule);
+
     assertOutletIdValid(payload.id);
     assertOutletMenuIdsValid(payload.menuIds);
     assertOutletOrderIdsValid(payload.orderIds);
     assertOutletNameValid(payload.name);
-    assertOutletAddressValid(payload.address);
-    assertOutletContactValid(payload.contact);
-    assertOutletServiceScheduleValid(payload.serviceSchedule);
+    assertOutletAddressValid(address);
+    assertOutletContactValid(contact);
+    assertOutletServiceScheduleValid(serviceSchedule);
 
     const outlet = new Outlet();
     outlet.id = payload.id;
@@ -66,9 +70,9 @@ export class Outlet extends Entity<OutletId> {
     outlet.orderIds = payload.orderIds;
     outlet.name = payload.name;
     outlet.tables = [];
-    outlet.address = payload.address;
-    outlet.contact = payload.contact;
-    outlet.serviceSchedule = payload.serviceSchedule;
+    outlet.address = address;
+    outlet.contact = contact;
+    outlet.serviceSchedule = serviceSchedule;
     return outlet;
   }
 
@@ -86,16 +90,19 @@ export class Outlet extends Entity<OutletId> {
       this.name = payload.name;
     }
     if (payload.address) {
-      assertOutletAddressValid(payload.address);
-      this.address = payload.address;
+      const address = Address.create(payload.address);
+      assertOutletAddressValid(address);
+      this.address = address;
     }
     if (payload.contact) {
-      assertOutletContactValid(payload.contact);
-      this.contact = payload.contact;
+      const contact = Contact.create(payload.contact);
+      assertOutletContactValid(contact);
+      this.contact = contact;
     }
     if (payload.serviceSchedule) {
-      assertOutletServiceScheduleValid(payload.serviceSchedule);
-      this.serviceSchedule = payload.serviceSchedule;
+      const serviceSchedule = ServiceSchedule.create(payload.serviceSchedule);
+      assertOutletServiceScheduleValid(serviceSchedule);
+      this.serviceSchedule = serviceSchedule;
     }
 
     this._setUpdatedAtToNow();
