@@ -89,14 +89,15 @@ export class Outlet extends Entity<OutletId> {
     if (payload.serviceSchedule) {
       this.serviceSchedule = ServiceSchedule.create(payload.serviceSchedule);
     }
-
     this._setUpdatedAtToNow();
+    return this._id;
   }
 
   addTable(payload: CreateTablePayload) {
     const table = Table.create(payload);
     this._tables.set(table.id, table);
     this._setUpdatedAtToNow();
+    return table.id;
   }
 
   updateTableById(tableId: string, payload: UpdateTablePayload) {

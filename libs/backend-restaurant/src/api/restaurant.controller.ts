@@ -23,7 +23,10 @@ import {
 import {
   CreateOutletRequestBody,
   CreateRestaurantRequestBody,
+  CreateTableRequestBody,
+  UpdateOutletRequestBody,
   UpdateRestaurantRequestBody,
+  UpdateTableRequestBody,
 } from './restaurant.dtos';
 
 @Controller('restaurants')
@@ -45,9 +48,8 @@ export class RestaurantController {
   @Auth({ requiredPermissions: [Permission.WRITE_RESTAURANT] })
   @Post()
   async createRestaurant(@Body() body: CreateRestaurantRequestBody) {
-    const restaurant = await this._services.createRestaurant(body);
-    const dto = this._mapper.toResponseDto(restaurant);
-    return HttpResponse.ok(dto);
+    const restaurantId = await this._services.createRestaurant(body);
+    return HttpResponse.ok({ id: restaurantId });
   }
 
   @Auth({ requiredPermissions: [Permission.WRITE_RESTAURANT] })
@@ -56,19 +58,15 @@ export class RestaurantController {
     @Param('restaurantId') restaurantId: string,
     @Body() body: UpdateRestaurantRequestBody,
   ) {
-    const restaurant = await this._services.updateRestaurantById(
-      restaurantId,
-      body,
-    );
-    const dto = this._mapper.toResponseDto(restaurant);
-    return HttpResponse.ok(dto);
+    await this._services.updateRestaurantById(restaurantId, body);
+    return HttpResponse.ok({ id: restaurantId });
   }
 
   @Auth({ requiredPermissions: [Permission.WRITE_RESTAURANT] })
   @Delete(':restaurantId')
   async removeRestaurantById(@Param('restaurantId') restaurantId: string) {
     await this._services.removeRestaurantById(restaurantId);
-    return HttpResponse.ok();
+    return HttpResponse.ok({ id: restaurantId });
   }
 
   @Auth({ requiredPermissions: [Permission.WRITE_RESTAURANT] })
@@ -77,9 +75,8 @@ export class RestaurantController {
     @Param('restaurantId') restaurantId: string,
     @Body() body: CreateOutletRequestBody,
   ) {
-    const restaurant = await this._services.createOutlet(restaurantId, body);
-    const dto = this._mapper.toResponseDto(restaurant);
-    return HttpResponse.ok(dto);
+    const outletId = await this._services.createOutlet(restaurantId, body);
+    return HttpResponse.ok({ id: outletId });
   }
 
   @Auth({ requiredPermissions: [Permission.WRITE_RESTAURANT] })
@@ -87,15 +84,10 @@ export class RestaurantController {
   async updateOutletById(
     @Param('restaurantId') restaurantId: string,
     @Param('outletId') outletId: string,
-    @Body() body: UpdateRestaurantRequestBody,
+    @Body() body: UpdateOutletRequestBody,
   ) {
-    const restaurant = await this._services.updateOutletById(
-      restaurantId,
-      outletId,
-      body,
-    );
-    const dto = this._mapper.toResponseDto(restaurant);
-    return HttpResponse.ok(dto);
+    await this._services.updateOutletById(restaurantId, outletId, body);
+    return HttpResponse.ok({ id: outletId });
   }
 
   @Auth({ requiredPermissions: [Permission.WRITE_RESTAURANT] })
@@ -105,6 +97,44 @@ export class RestaurantController {
     @Param('outletId') outletId: string,
   ) {
     await this._services.removeOutletById(restaurantId, outletId);
-    return HttpResponse.ok();
+    return HttpResponse.ok({ id: outletId });
+  }
+
+  @Auth({ requiredPermissions: [Permission.WRITE_RESTAURANT] })
+  @Post(':restaurantId/outlets/:outletId/tables')
+  async createTable(
+    @Param('restaurantId') restaurantId: string,
+    @Param('outletId') outletId: string,
+    @Body() body: CreateTableRequestBody,
+  ) {
+    const tableId = await this._services.createTable(
+      restaurantId,
+      outletId,
+      body,
+    );
+    return HttpResponse.ok({ id: tableId });
+  }
+
+  @Auth({ requiredPermissions: [Permission.WRITE_RESTAURANT] })
+  @Patch(':restaurantId/outlets/:outletId/tables/:tableId')
+  async updateTableById(
+    @Param('restaurantId') restaurantId: string,
+    @Param('outletId') outletId: string,
+    @Param('tableId') tableId: string,
+    @Body() body: UpdateTableRequestBody,
+  ) {
+    await this._services.updateTableById(restaurantId, outletId, tableId, body);
+    return HttpResponse.ok({ id: tableId });
+  }
+
+  @Auth({ requiredPermissions: [Permission.WRITE_RESTAURANT] })
+  @Delete(':restaurantId/outlets/:outletId/tables/:tableId')
+  async removeTableById(
+    @Param('restaurantId') restaurantId: string,
+    @Param('outletId') outletId: string,
+    @Param('tableId') tableId: string,
+  ) {
+    await this._services.removeTableById(restaurantId, outletId, tableId);
+    return HttpResponse.ok({ id: tableId });
   }
 }
