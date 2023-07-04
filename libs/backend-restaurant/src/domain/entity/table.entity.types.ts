@@ -1,20 +1,36 @@
 import { z } from 'zod';
 
-import { EntityId } from '@resnity/backend-common';
+import {
+  EntityId,
+  Validate,
+  domainSchemaValidatorBuilder,
+} from '@resnity/backend-common';
 
-export const TableId = EntityId.brand<'TableId'>();
-export type TableId = z.infer<typeof TableId>;
+const tableIdSchema = EntityId.brand<'TableId'>();
 
-export const TableCode = z.string().min(4).max(12).brand<'TableCode'>();
-export type TableCode = z.infer<typeof TableCode>;
+const tableCodeSchema = z.string().min(4).max(12).brand<'TableCode'>();
 
-export const TableCapacity = z
+const tableCapacitySchema = z
   .number()
   .int()
   .min(1)
   .max(100)
   .brand<'TableCapacity'>();
-export type TableCapacity = z.infer<typeof TableCapacity>;
+
+export const assertTableIdValid: Validate<typeof tableIdSchema> =
+  domainSchemaValidatorBuilder(tableIdSchema);
+
+export const assertTableCodeValid: Validate<typeof tableCodeSchema> =
+  domainSchemaValidatorBuilder(tableCodeSchema);
+
+export const assertTableCapacityValid: Validate<typeof tableCapacitySchema> =
+  domainSchemaValidatorBuilder(tableCapacitySchema);
+
+export type TableId = z.infer<typeof tableIdSchema>;
+
+export type TableCode = z.infer<typeof tableCodeSchema>;
+
+export type TableCapacity = z.infer<typeof tableCapacitySchema>;
 
 export type CreateTablePayload = {
   code: string;

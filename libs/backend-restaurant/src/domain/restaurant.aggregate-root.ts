@@ -10,8 +10,11 @@ import {
 } from '@resnity/backend-common';
 
 import { Outlet } from './entity/outlet.entity';
-import { assertOutletIdValid } from './entity/outlet.entity.assertions';
-import { OutletId, UpdateOutletPayload } from './entity/outlet.entity.types';
+import {
+  OutletId,
+  UpdateOutletPayload,
+  assertOutletIdValid,
+} from './entity/outlet.entity.types';
 import {
   CreateRestaurantPayload,
   RestaurantId,

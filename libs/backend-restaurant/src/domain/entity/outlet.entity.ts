@@ -12,15 +12,6 @@ import { Address } from '../value-object/address.value-object';
 import { Contact } from '../value-object/contact.value-object';
 import { ServiceSchedule } from '../value-object/service-schedule.value-object';
 import {
-  assertOutletAddressValid,
-  assertOutletContactValid,
-  assertOutletIdValid,
-  assertOutletMenuIdsValid,
-  assertOutletNameValid,
-  assertOutletOrderIdsValid,
-  assertOutletServiceScheduleValid,
-} from './outlet.entity.assertions';
-import {
   CreateOutletPayload,
   OutletAddress,
   OutletContact,
@@ -31,6 +22,13 @@ import {
   OutletServiceSchedule,
   OutletTable,
   UpdateOutletPayload,
+  assertOutletAddressValid,
+  assertOutletContactValid,
+  assertOutletIdValid,
+  assertOutletMenuIdsValid,
+  assertOutletNameValid,
+  assertOutletOrderIdsValid,
+  assertOutletServiceScheduleValid,
 } from './outlet.entity.types';
 import { Table } from './table.entity';
 import { TableId } from './table.entity.types';

@@ -1,14 +1,29 @@
 import { z } from 'zod';
 
-export const ContactPhoneNumber = z
+import {
+  Validate,
+  domainSchemaValidatorBuilder,
+} from '@resnity/backend-common';
+
+const contactPhoneNumberSchema = z
   .string()
   .min(8)
   .max(20)
   .brand<'ContactPhoneNumber'>();
-export type ContactPhoneNumber = z.infer<typeof ContactPhoneNumber>;
 
-export const ContactEmail = z.string().email().brand<'ContactEmail'>();
-export type ContactEmail = z.infer<typeof ContactEmail>;
+const contactEmailSchema = z.string().email().brand<'ContactEmail'>();
+const maybeContactEmailSchema = contactEmailSchema.optional();
+
+export const assertContactPhoneNumberValid: Validate<
+  typeof contactPhoneNumberSchema
+> = domainSchemaValidatorBuilder(contactPhoneNumberSchema);
+
+export const assertMaybeEmailValid: Validate<typeof maybeContactEmailSchema> =
+  domainSchemaValidatorBuilder(maybeContactEmailSchema);
+
+export type ContactPhoneNumber = z.infer<typeof contactPhoneNumberSchema>;
+
+export type ContactEmail = z.infer<typeof contactEmailSchema>;
 
 export type CreateContactPayload = {
   phoneNumber: string;

@@ -3,13 +3,11 @@ import { AutoMap } from '@automapper/classes';
 import { ValueObject } from '@resnity/backend-common';
 
 import {
-  assertTimePeriodEndTimeValid,
-  assertTimePeriodStartTimeValid,
-} from './time-period.value-object.assertions';
-import {
   CreateTimePeriodPayload,
   TimePeriodEndTime,
   TimePeriodStartTime,
+  assertTimePeriodEndTimeValid,
+  assertTimePeriodStartTimeValid,
 } from './time-period.value-object.types';
 
 export class TimePeriod extends ValueObject {

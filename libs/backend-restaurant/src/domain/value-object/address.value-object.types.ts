@@ -1,33 +1,73 @@
 import { z } from 'zod';
 
-export const AddressLine1 = z.string().min(2).max(50).brand<'AddressLine1'>();
-export type AddressLine1 = z.infer<typeof AddressLine1>;
+import {
+  Validate,
+  domainSchemaValidatorBuilder,
+} from '@resnity/backend-common';
 
-export const AddressLine2 = z.string().min(2).max(50).brand<'AddressLine2'>();
-export type AddressLine2 = z.infer<typeof AddressLine2>;
+const addressLine1Schema = z.string().min(2).max(50).brand<'AddressLine1'>();
 
-export const AddressLine3 = z.string().min(2).max(50).brand<'AddressLine3'>();
-export type AddressLine3 = z.infer<typeof AddressLine3>;
+const addressLine2Schema = z.string().min(2).max(50).brand<'AddressLine2'>();
+const maybeAddressLine2Schema = addressLine2Schema.optional();
 
-export const AddressPostcode = z
+const addressLine3Schema = z.string().min(2).max(50).brand<'AddressLine3'>();
+const maybeAddressLine3Schema = addressLine3Schema.optional();
+
+const addressPostcodeSchema = z
   .string()
   .min(2)
   .max(50)
   .brand<'AddressPostcode'>();
-export type AddressPostcode = z.infer<typeof AddressPostcode>;
 
-export const AddressCity = z.string().min(2).max(50).brand<'AddressCity'>();
-export type AddressCity = z.infer<typeof AddressCity>;
+const addressCitySchema = z.string().min(2).max(50).brand<'AddressCity'>();
+const maybeAddressCitySchema = addressCitySchema.optional();
 
-export const AddressState = z.string().min(2).max(50).brand<'AddressState'>();
-export type AddressState = z.infer<typeof AddressState>;
+const addressStateSchema = z.string().min(2).max(50).brand<'AddressState'>();
 
-export const AddressCountry = z
+const addressCountrySchema = z
   .string()
   .min(2)
   .max(50)
   .brand<'AddressCountry'>();
-export type AddressCountry = z.infer<typeof AddressCountry>;
+
+export const assertAddressLine1Valid: Validate<typeof addressLine1Schema> =
+  domainSchemaValidatorBuilder(addressLine1Schema);
+
+export const assertMaybeAddressLine2Valid: Validate<
+  typeof maybeAddressLine2Schema
+> = domainSchemaValidatorBuilder(maybeAddressLine2Schema);
+
+export const assertMaybeAddressLine3Valid: Validate<
+  typeof maybeAddressLine3Schema
+> = domainSchemaValidatorBuilder(maybeAddressLine3Schema);
+
+export const assertAddressPostcodeValid: Validate<
+  typeof addressPostcodeSchema
+> = domainSchemaValidatorBuilder(addressPostcodeSchema);
+
+export const assertMaybeAddressCityValid: Validate<
+  typeof maybeAddressCitySchema
+> = domainSchemaValidatorBuilder(maybeAddressCitySchema);
+
+export const assertAddressStateValid: Validate<typeof addressStateSchema> =
+  domainSchemaValidatorBuilder(addressStateSchema);
+
+export const assertAddressCountryValid: Validate<typeof addressCountrySchema> =
+  domainSchemaValidatorBuilder(addressCountrySchema);
+
+export type AddressLine1 = z.infer<typeof addressLine1Schema>;
+
+export type AddressLine2 = z.infer<typeof addressLine2Schema>;
+
+export type AddressLine3 = z.infer<typeof addressLine3Schema>;
+
+export type AddressPostcode = z.infer<typeof addressPostcodeSchema>;
+
+export type AddressCity = z.infer<typeof addressCitySchema>;
+
+export type AddressState = z.infer<typeof addressStateSchema>;
+
+export type AddressCountry = z.infer<typeof addressCountrySchema>;
 
 export type CreateAddressPayload = {
   line1: string;
