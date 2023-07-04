@@ -1,37 +1,77 @@
 import { z } from 'zod';
 
-import { EntityId } from '@resnity/backend-common';
+import {
+  EntityId,
+  Validate,
+  domainSchemaValidatorBuilder,
+} from '@resnity/backend-common';
 
 import { Address } from '../value-object/address.value-object';
 import { Contact } from '../value-object/contact.value-object';
 import { ServiceSchedule } from '../value-object/service-schedule.value-object';
 import { Table } from './table.entity';
 
-export const OutletId = EntityId.brand<'OutletId'>();
-export type OutletId = z.infer<typeof OutletId>;
+const outletIdSchema = EntityId.brand<'OutletId'>();
 
-export const OutletOrderId = EntityId.brand<'OutletOrderId'>();
-export type OutletOrderId = z.infer<typeof OutletOrderId>;
+const outletOrderIdSchema = EntityId.brand<'OutletOrderId'>();
+const outletOrderIdsSchema = outletOrderIdSchema.array();
 
-export const OutletMenuId = EntityId.brand<'OutletMenuId'>();
-export type OutletMenuId = z.infer<typeof OutletMenuId>;
+const outletMenuIdSchema = EntityId.brand<'OutletMenuId'>();
+const outletMenuIdsSchema = outletMenuIdSchema.array();
 
-export const OutletName = z.string().min(2).max(50).brand<'OutletName'>();
-export type OutletName = z.infer<typeof OutletName>;
+const outletNameSchema = z.string().min(2).max(50).brand<'OutletName'>();
 
-export const OutletTable = z.instanceof(Table).brand<'OutletTable'>();
-export type OutletTable = z.infer<typeof OutletTable>;
+const outletTableSchema = z.instanceof(Table).brand<'OutletTable'>();
+const outletTablesSchema = outletTableSchema.array();
 
-export const OutletAddress = z.instanceof(Address).brand<'OutletAddress'>();
-export type OutletAddress = z.infer<typeof OutletAddress>;
+const outletAddressSchema = z.instanceof(Address).brand<'OutletAddress'>();
 
-export const OutletContact = z.instanceof(Contact).brand<'OutletContact'>();
-export type OutletContact = z.infer<typeof OutletContact>;
+const outletContactSchema = z.instanceof(Contact).brand<'OutletContact'>();
 
-export const OutletServiceSchedule = z
+const outletServiceScheduleSchema = z
   .instanceof(ServiceSchedule)
   .brand<'OutletServiceSchedule'>();
-export type OutletServiceSchedule = z.infer<typeof OutletServiceSchedule>;
+
+export const assertOutletIdValid: Validate<typeof outletIdSchema> =
+  domainSchemaValidatorBuilder(outletIdSchema);
+
+export const assertOutletOrderIdsValid: Validate<typeof outletOrderIdsSchema> =
+  domainSchemaValidatorBuilder(outletOrderIdsSchema);
+
+export const assertOutletMenuIdsValid: Validate<typeof outletMenuIdsSchema> =
+  domainSchemaValidatorBuilder(outletMenuIdsSchema);
+
+export const assertOutletNameValid: Validate<typeof outletNameSchema> =
+  domainSchemaValidatorBuilder(outletNameSchema);
+
+export const assertOutletTablesValid: Validate<typeof outletTablesSchema> =
+  domainSchemaValidatorBuilder(outletTablesSchema);
+
+export const assertOutletAddressValid: Validate<typeof outletAddressSchema> =
+  domainSchemaValidatorBuilder(outletAddressSchema);
+
+export const assertOutletContactValid: Validate<typeof outletContactSchema> =
+  domainSchemaValidatorBuilder(outletContactSchema);
+
+export const assertOutletServiceScheduleValid: Validate<
+  typeof outletServiceScheduleSchema
+> = domainSchemaValidatorBuilder(outletServiceScheduleSchema);
+
+export type OutletId = z.infer<typeof outletIdSchema>;
+
+export type OutletOrderId = z.infer<typeof outletOrderIdSchema>;
+
+export type OutletMenuId = z.infer<typeof outletMenuIdSchema>;
+
+export type OutletName = z.infer<typeof outletNameSchema>;
+
+export type OutletTable = z.infer<typeof outletTableSchema>;
+
+export type OutletAddress = z.infer<typeof outletAddressSchema>;
+
+export type OutletContact = z.infer<typeof outletContactSchema>;
+
+export type OutletServiceSchedule = z.infer<typeof outletServiceScheduleSchema>;
 
 export type CreateOutletPayload = {
   menuIds: string[];

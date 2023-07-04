@@ -3,15 +3,6 @@ import { AutoMap } from '@automapper/classes';
 import { ValueObject } from '@resnity/backend-common';
 
 import {
-  assertAddressCountryValid,
-  assertAddressLine1Valid,
-  assertAddressPostcodeValid,
-  assertAddressStateValid,
-  assertMaybeAddressCityValid,
-  assertMaybeAddressLine2Valid,
-  assertMaybeAddressLine3Valid,
-} from './address.value-object.assertions';
-import {
   AddressCity,
   AddressCountry,
   AddressLine1,
@@ -20,6 +11,13 @@ import {
   AddressPostcode,
   AddressState,
   CreateAddressPayload,
+  assertAddressCountryValid,
+  assertAddressLine1Valid,
+  assertAddressPostcodeValid,
+  assertAddressStateValid,
+  assertMaybeAddressCityValid,
+  assertMaybeAddressLine2Valid,
+  assertMaybeAddressLine3Valid,
 } from './address.value-object.types';
 
 export class Address extends ValueObject {

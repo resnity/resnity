@@ -3,13 +3,11 @@ import { AutoMap } from '@automapper/classes';
 import { ValueObject } from '@resnity/backend-common';
 
 import {
-  assertServiceScheduleNameValid,
-  assertServiceScheduleTimePeriodValid,
-} from './service-schedule.value-object.assertions';
-import {
   CreateServiceSchedulePayload,
   ServiceScheduleName,
   ServiceScheduleTimePeriod,
+  assertServiceScheduleNameValid,
+  assertServiceScheduleTimePeriodValid,
 } from './service-schedule.value-object.types';
 import { TimePeriod } from './time-period.value-object';
 

@@ -7,16 +7,14 @@ import {
 } from '@resnity/backend-common';
 
 import {
-  assertTableCapacityValid,
-  assertTableCodeValid,
-  assertTableIdValid,
-} from './table.entity.assertions';
-import {
   CreateTablePayload,
   TableCapacity,
   TableCode,
   TableId,
   UpdateTablePayload,
+  assertTableCapacityValid,
+  assertTableCodeValid,
+  assertTableIdValid,
 } from './table.entity.types';
 
 export class Table extends Entity<TableId> {
