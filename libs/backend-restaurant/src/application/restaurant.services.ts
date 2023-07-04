@@ -3,8 +3,6 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 
 import { AppError, DomainError, NotFoundError } from '@resnity/backend-common';
 
-import { Outlet } from '../domain/entity/outlet.entity';
-import { CreateOutletPayload } from '../domain/entity/outlet.entity.types';
 import { Restaurant } from '../domain/restaurant.aggregate-root';
 import { CreateRestaurantPayload } from '../domain/restaurant.aggregate-root.types';
 import {
@@ -25,37 +23,35 @@ export const RESTAURANT_SERVICE_TOKEN = Symbol('RESTAURANT_SERVICE_TOKEN');
 export interface RestaurantServices {
   getRestaurants(): Promise<Restaurant[]>;
 
-  createRestaurant(
-    payload: CreateRestaurantServicePayload,
-  ): Promise<Restaurant>;
+  createRestaurant(payload: CreateRestaurantServicePayload): Promise<string>;
   updateRestaurantById(
     restaurantId: string,
     payload: UpdateRestaurantServicePayload,
-  ): Promise<Restaurant>;
+  ): Promise<void>;
   removeRestaurantById(restaurantId: string): Promise<void>;
 
   createOutlet(
     restaurantId: string,
     payload: CreateOutletServicePayload,
-  ): Promise<Restaurant>;
+  ): Promise<string>;
   updateOutletById(
     restaurantId: string,
     outletId: string,
     payload: UpdateOutletServicePayload,
-  ): Promise<Restaurant>;
+  ): Promise<void>;
   removeOutletById(restaurantId: string, outletId: string): Promise<void>;
 
   createTable(
     restaurantId: string,
     outletId: string,
     payload: CreateTableServicePayload,
-  ): Promise<Restaurant>;
+  ): Promise<string>;
   updateTableById(
     restaurantId: string,
     outletId: string,
     tableId: string,
     payload: UpdateTableServicePayload,
-  ): Promise<Restaurant>;
+  ): Promise<void>;
   removeTableById(
     restaurantId: string,
     outletId: string,
@@ -85,7 +81,7 @@ export class RestaurantServiceImpl implements RestaurantServices {
       await restaurant.publishEvents(this._eventEmitter);
     });
 
-    return restaurant;
+    return restaurant.id;
   }
 
   async updateRestaurantById(
@@ -99,8 +95,6 @@ export class RestaurantServiceImpl implements RestaurantServices {
       await this._repository.update(restaurant);
       await restaurant.publishEvents(this._eventEmitter);
     });
-
-    return restaurant;
   }
 
   async removeRestaurantById(restaurantId: string) {
@@ -118,16 +112,14 @@ export class RestaurantServiceImpl implements RestaurantServices {
     payload: CreateOutletServicePayload,
   ) {
     const restaurant = await this._getRestaurantById(restaurantId);
-    const outlet = this._createOutlet(payload);
-
-    restaurant.addOutlet(outlet);
+    const outletId = restaurant.addOutlet(payload);
 
     await this._repository.withTransaction(async () => {
       await this._repository.update(restaurant);
       await restaurant.publishEvents(this._eventEmitter);
     });
 
-    return restaurant;
+    return outletId;
   }
 
   async updateOutletById(
@@ -142,8 +134,6 @@ export class RestaurantServiceImpl implements RestaurantServices {
       await this._repository.update(restaurant);
       await restaurant.publishEvents(this._eventEmitter);
     });
-
-    return restaurant;
   }
 
   async removeOutletById(restaurantId: string, outletId: string) {
@@ -162,14 +152,14 @@ export class RestaurantServiceImpl implements RestaurantServices {
     payload: CreateTableServicePayload,
   ) {
     const restaurant = await this._getRestaurantById(restaurantId);
-    restaurant.addTable(outletId, payload);
+    const tableId = restaurant.addTable(outletId, payload);
 
     await this._repository.withTransaction(async () => {
       await this._repository.update(restaurant);
       await restaurant.publishEvents(this._eventEmitter);
     });
 
-    return restaurant;
+    return tableId;
   }
 
   async updateTableById(
@@ -185,8 +175,6 @@ export class RestaurantServiceImpl implements RestaurantServices {
       await this._repository.update(restaurant);
       await restaurant.publishEvents(this._eventEmitter);
     });
-
-    return restaurant;
   }
 
   async removeTableById(
@@ -212,14 +200,6 @@ export class RestaurantServiceImpl implements RestaurantServices {
   private _createRestaurant(payload: CreateRestaurantPayload) {
     try {
       return Restaurant.create(payload);
-    } catch (err) {
-      throw AppError.fromDomain(err as DomainError);
-    }
-  }
-
-  private _createOutlet(payload: CreateOutletPayload) {
-    try {
-      return Outlet.create(payload);
     } catch (err) {
       throw AppError.fromDomain(err as DomainError);
     }

@@ -7,9 +7,11 @@ import {
   CreateOutletServicePayload,
   CreateRestaurantServicePayload,
   CreateServiceScheduleServicePayload,
+  CreateTableServicePayload,
   CreateTimePeriodServicePayload,
   UpdateOutletServicePayload,
   UpdateRestaurantServicePayload,
+  UpdateTableServicePayload,
 } from '../application/restaurant.services.types';
 
 export class AddressResponseDto extends EmbeddedResponseDto {
@@ -159,4 +161,14 @@ export class UpdateOutletRequestBody implements UpdateOutletServicePayload {
   readonly address?: CreateAddressRequestBody;
   readonly contact?: CreateContactRequestBody;
   readonly serviceSchedule?: CreateServiceScheduleRequestBody;
+}
+
+export class CreateTableRequestBody implements CreateTableServicePayload {
+  readonly code: string;
+  readonly capacity: number;
+}
+
+export class UpdateTableRequestBody implements UpdateTableServicePayload {
+  readonly code?: string;
+  readonly capacity?: number;
 }

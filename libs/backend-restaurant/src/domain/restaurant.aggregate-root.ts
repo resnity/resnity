@@ -87,7 +87,7 @@ export class Restaurant extends AggregateRoot<RestaurantId> {
   }
 
   remove() {
-    // publish event
+    return this.id;
   }
 
   addMenu(menuId: string) {
@@ -101,6 +101,7 @@ export class Restaurant extends AggregateRoot<RestaurantId> {
     const outlet = Outlet.create(payload);
     this._outlets.set(outlet.id, outlet);
     this._setUpdatedAtToNow();
+    return outlet.id;
   }
 
   updateOutletById(outletId: string, payload: UpdateOutletPayload) {
@@ -120,8 +121,9 @@ export class Restaurant extends AggregateRoot<RestaurantId> {
   addTable(outletId: string, payload: CreateTablePayload) {
     assertOutletIdValid(outletId);
     const outlet = this._getOutletById(outletId);
-    outlet.addTable(payload);
+    const tableId = outlet.addTable(payload);
     this._setUpdatedAtToNow();
+    return tableId;
   }
 
   updateTableById(
