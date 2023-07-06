@@ -6,6 +6,8 @@ import {
   domainSchemaValidatorBuilder,
 } from '@resnity/backend-common';
 
+import { CreateOutletPayload } from './entity/outlet.entity.types';
+
 const restaurantIdSchema = EntityId.brand<'RestaurantId'>();
 
 const restaurantNameSchema = z
@@ -27,6 +29,7 @@ export type RestaurantName = z.infer<typeof restaurantNameSchema>;
 export type CreateRestaurantPayload = {
   name: string;
   menuIds: string[];
+  outlets: CreateOutletPayload[];
 };
 
 export type UpdateRestaurantPayload = {

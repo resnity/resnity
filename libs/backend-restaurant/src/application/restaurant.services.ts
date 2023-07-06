@@ -1,7 +1,12 @@
 import { Inject } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
-import { AppError, DomainError, NotFoundError } from '@resnity/backend-common';
+import {
+  AppError,
+  DomainError,
+  NotFoundError,
+  isNil,
+} from '@resnity/backend-common';
 
 import { Restaurant } from '../domain/restaurant.aggregate-root';
 import { CreateRestaurantPayload } from '../domain/restaurant.aggregate-root.types';
@@ -73,12 +78,13 @@ export class RestaurantServiceImpl implements RestaurantServices {
   async createRestaurant(payload: CreateRestaurantServicePayload) {
     const restaurant = this._createRestaurant({
       menuIds: [],
-      name: payload.name,
+      outlets: [],
+      ...payload,
     });
 
     await this._repository.withTransaction(async () => {
-      await this._repository.create(restaurant);
       await restaurant.publishEvents(this._eventEmitter);
+      await this._repository.create(restaurant);
     });
 
     return restaurant.id;
@@ -92,8 +98,8 @@ export class RestaurantServiceImpl implements RestaurantServices {
     restaurant.update(payload);
 
     await this._repository.withTransaction(async () => {
-      await this._repository.update(restaurant);
       await restaurant.publishEvents(this._eventEmitter);
+      await this._repository.update(restaurant);
     });
   }
 
@@ -118,8 +124,8 @@ export class RestaurantServiceImpl implements RestaurantServices {
     });
 
     await this._repository.withTransaction(async () => {
-      await this._repository.update(restaurant);
       await restaurant.publishEvents(this._eventEmitter);
+      await this._repository.update(restaurant);
     });
 
     return outletId;
@@ -134,8 +140,8 @@ export class RestaurantServiceImpl implements RestaurantServices {
     restaurant.updateOutletById(outletId, payload);
 
     await this._repository.withTransaction(async () => {
-      await this._repository.update(restaurant);
       await restaurant.publishEvents(this._eventEmitter);
+      await this._repository.update(restaurant);
     });
   }
 
@@ -144,8 +150,8 @@ export class RestaurantServiceImpl implements RestaurantServices {
     restaurant.removeOutletById(outletId);
 
     await this._repository.withTransaction(async () => {
-      await this._repository.update(restaurant);
       await restaurant.publishEvents(this._eventEmitter);
+      await this._repository.update(restaurant);
     });
   }
 
@@ -158,8 +164,8 @@ export class RestaurantServiceImpl implements RestaurantServices {
     const tableId = restaurant.addTable(outletId, payload);
 
     await this._repository.withTransaction(async () => {
-      await this._repository.update(restaurant);
       await restaurant.publishEvents(this._eventEmitter);
+      await this._repository.update(restaurant);
     });
 
     return tableId;
@@ -175,8 +181,8 @@ export class RestaurantServiceImpl implements RestaurantServices {
     restaurant.updateTableById(outletId, tableId, payload);
 
     await this._repository.withTransaction(async () => {
-      await this._repository.update(restaurant);
       await restaurant.publishEvents(this._eventEmitter);
+      await this._repository.update(restaurant);
     });
   }
 
@@ -189,14 +195,14 @@ export class RestaurantServiceImpl implements RestaurantServices {
     restaurant.removeTableById(outletId, tableId);
 
     await this._repository.withTransaction(async () => {
-      await this._repository.update(restaurant);
       await restaurant.publishEvents(this._eventEmitter);
+      await this._repository.update(restaurant);
     });
   }
 
   private async _getRestaurantById(id: string) {
     const result = await this._repository.findById(id);
-    if (result === undefined) throw new NotFoundError();
+    if (isNil(result)) throw new NotFoundError();
     return result;
   }
 
