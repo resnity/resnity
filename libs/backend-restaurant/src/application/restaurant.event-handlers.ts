@@ -1,8 +1,10 @@
 import { Inject } from '@nestjs/common';
 
-import { AppError, DomainError, NotFoundError } from '@resnity/backend-common';
+import {
+  NotFoundError,
+  withTransformUnknownErrorToAppError,
+} from '@resnity/backend-common';
 
-import { Restaurant } from '../domain/restaurant.aggregate-root';
 import {
   RESTAURANT_REPOSITORY_TOKEN,
   RestaurantRepository,
@@ -25,7 +27,9 @@ export class RestaurantEventHandlersImpl implements RestaurantEventHandlers {
 
   async menuCreated(payload: MenuCreatedEventHandlerPayload) {
     const restaurant = await this._getRestaurantById(payload.restaurantId);
-    this._addMenu(restaurant, payload.menuId);
+    withTransformUnknownErrorToAppError(() =>
+      restaurant.addMenu(payload.menuId),
+    );
     await this._repository.update(restaurant);
   }
 
@@ -33,13 +37,5 @@ export class RestaurantEventHandlersImpl implements RestaurantEventHandlers {
     const result = await this._repository.findById(id);
     if (result === undefined) throw new NotFoundError();
     return result;
-  }
-
-  private _addMenu(restaurant: Restaurant, menuId: string) {
-    try {
-      restaurant.addMenu(menuId);
-    } catch (err) {
-      throw AppError.fromDomain(err as DomainError);
-    }
   }
 }
