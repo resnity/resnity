@@ -67,7 +67,7 @@ export class RestaurantServiceImpl implements RestaurantServices {
   ) {}
 
   async getRestaurants() {
-    return this._repository.findMany();
+    return await this._repository.findMany();
   }
 
   async createRestaurant(payload: CreateRestaurantServicePayload) {
@@ -193,7 +193,7 @@ export class RestaurantServiceImpl implements RestaurantServices {
 
   private async _getRestaurantById(id: string) {
     const result = await this._repository.findById(id);
-    if (result === null) throw new NotFoundError();
+    if (result === undefined) throw new NotFoundError();
     return result;
   }
 

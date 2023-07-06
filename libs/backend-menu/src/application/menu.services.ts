@@ -138,7 +138,7 @@ export class MenuServicesImpl implements MenuServices {
 
   private async _getMenuById(id: string) {
     const result = await this._repository.findById(id);
-    if (result === null) throw new NotFoundError();
+    if (result === undefined) throw new NotFoundError();
     return result;
   }
 

@@ -41,6 +41,11 @@ export {
 } from './libs/validator';
 export type { Validate } from './libs/validator';
 
+export {
+  APP_CLS_TENANT_ID,
+  APP_CLS_TRANSACTION_SESSION,
+  APP_CLS_USER,
+} from './modules/app-cls/app-cls.constants';
 export { AppClsModule } from './modules/app-cls/app-cls.module';
 export { AppClsService } from './modules/app-cls/app-cls.service';
 
@@ -53,7 +58,9 @@ export {
 
 export { MapperModule } from './modules/mapper/mapper.module';
 export {
-  extendBaseMaps,
+  extendBaseEntityToModelMap,
+  extendBaseEntityToResponseDtoMap,
+  extendBaseModelToEntityMap,
   initMappingProfile,
   mapper,
   MAPPER_TOKEN,

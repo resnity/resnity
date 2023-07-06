@@ -1,6 +1,10 @@
 import { Collection, Filter, OptionalUnlessRequiredId } from 'mongodb';
 
 import { Entity, EntityId } from '../domain/entity';
+import {
+  APP_CLS_TENANT_ID,
+  APP_CLS_TRANSACTION_SESSION,
+} from '../modules/app-cls/app-cls.constants';
 import { AppClsService } from '../modules/app-cls/app-cls.service';
 import { MongoDbClient } from '../modules/mongodb/mongo-db.client';
 import { EntityMapper } from './entity-mapper';
@@ -12,7 +16,7 @@ export interface Repository<
 > {
   findMany(): Promise<TEntity[]>;
 
-  findById(id: Filter<TModel>['_id']): Promise<TEntity | null>;
+  findById(id: Filter<TModel>['_id']): Promise<TEntity | undefined>;
 
   create(entity: TEntity): Promise<void>;
 
@@ -36,8 +40,8 @@ export class RepositoryImpl<
   ) {}
 
   async findMany() {
-    const tenantIdFilter: Filter<TModel>['tenantId'] =
-      this._appClsService.getTenantId();
+    const tenantIdFilter: Filter<TModel>['tenantId'] | undefined =
+      this._appClsService.get(APP_CLS_TENANT_ID);
 
     const result = this._collection.find<TModel>({ tenantId: tenantIdFilter });
     const models = await result.toArray();
@@ -46,41 +50,49 @@ export class RepositoryImpl<
   }
 
   async findById(id: Filter<TModel>['_id']) {
-    const model = await this._collection.findOne<TModel>({
-      _id: id,
-    });
-    return model ? this._mapper.fromPersistenceModel(model) : null;
+    const model = await this._collection.findOne<TModel>(
+      { _id: id },
+      { session: this._getSession() },
+    );
+    return model ? this._mapper.fromPersistenceModel(model) : undefined;
   }
 
   async create(entity: TEntity) {
     const model = this._mapper.toPersistenceModel(entity);
-    const tenantId = this._appClsService.getTenantId();
+    const tenantId = this._appClsService.get(APP_CLS_TENANT_ID);
 
     const tenantAwareModel = { ...model, tenantId };
+
     await this._collection.insertOne(
       tenantAwareModel as OptionalUnlessRequiredId<TModel>,
+      { session: this._getSession() },
     );
   }
 
   async update(entity: TEntity) {
     const { _id, ...model } = this._mapper.toPersistenceModel(entity);
     const idFilter: Filter<TModel>['_id'] = _id;
-    const tenantId = this._appClsService.getTenantId();
+    const tenantId = this._appClsService.get(APP_CLS_TENANT_ID);
 
     const tenantAwareModel = { ...model, tenantId };
-    await this._collection.replaceOne({ _id: idFilter }, tenantAwareModel);
+    await this._collection.replaceOne({ _id: idFilter }, tenantAwareModel, {
+      session: this._getSession(),
+    });
   }
 
   async remove(entity: TEntity) {
     const idFilter: Filter<TModel>['_id'] = entity.id;
-    await this._collection.deleteOne({ _id: idFilter });
+    await this._collection.deleteOne(
+      { _id: idFilter },
+      { session: this._getSession() },
+    );
   }
 
   async withTransaction<T>(fn: () => Promise<T>): Promise<T> {
-    let session = this._appClsService.getTransactionSession();
+    let session = this._appClsService.get(APP_CLS_TRANSACTION_SESSION);
     if (session === undefined) {
       session = this._client.startSession();
-      this._appClsService.setTransactionSession(session);
+      this._appClsService.set(APP_CLS_TRANSACTION_SESSION, session);
     }
 
     try {
@@ -90,7 +102,11 @@ export class RepositoryImpl<
       });
       return result as T;
     } finally {
-      await this._appClsService.clearTransactionSession();
+      await this._appClsService.get(APP_CLS_TRANSACTION_SESSION)?.endSession();
     }
+  }
+
+  private _getSession() {
+    return this._appClsService.get(APP_CLS_TRANSACTION_SESSION);
   }
 }

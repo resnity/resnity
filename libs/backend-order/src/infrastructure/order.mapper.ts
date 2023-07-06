@@ -2,9 +2,11 @@ import { Mapper, createMap } from '@automapper/core';
 import { Inject } from '@nestjs/common';
 
 import {
-  DomainEntityMapper,
+  EntityMapper,
   MAPPER_TOKEN,
-  extendBaseMaps,
+  extendBaseEntityToModelMap,
+  extendBaseEntityToResponseDtoMap,
+  extendBaseModelToEntityMap,
 } from '@resnity/backend-common';
 
 import {
@@ -34,37 +36,85 @@ import {
 } from './order.models';
 
 export const orderMappingProfile = (mapper: Mapper) => {
-  extendBaseMaps(mapper);
-
   createMap(mapper, Contact, ContactResponseDto);
   createMap(mapper, Customer, CustomerResponseDto);
   createMap(mapper, Price, PriceResponseDto);
-  createMap(mapper, LineItemModifier, LineItemModifierResponseDto);
-  createMap(mapper, LineItem, LineItemResponseDto);
-  createMap(mapper, Transaction, TransactionResponseDto);
-  createMap(mapper, Order, OrderResponseDto);
+  createMap(
+    mapper,
+    LineItemModifier,
+    LineItemModifierResponseDto,
+    extendBaseEntityToResponseDtoMap(mapper),
+  );
+  createMap(
+    mapper,
+    LineItem,
+    LineItemResponseDto,
+    extendBaseEntityToResponseDtoMap(mapper),
+  );
+  createMap(
+    mapper,
+    Transaction,
+    TransactionResponseDto,
+    extendBaseEntityToResponseDtoMap(mapper),
+  );
+  createMap(
+    mapper,
+    Order,
+    OrderResponseDto,
+    extendBaseEntityToResponseDtoMap(mapper),
+  );
 
   createMap(mapper, Contact, ContactModel);
   createMap(mapper, Customer, CustomerModel);
   createMap(mapper, Price, PriceModel);
-  createMap(mapper, LineItemModifier, LineItemModifierModel);
-  createMap(mapper, LineItem, LineItemModel);
-  createMap(mapper, Transaction, TransactionModel);
-  createMap(mapper, Order, OrderModel);
+  createMap(
+    mapper,
+    LineItemModifier,
+    LineItemModifierModel,
+    extendBaseEntityToModelMap(mapper),
+  );
+  createMap(
+    mapper,
+    LineItem,
+    LineItemModel,
+    extendBaseEntityToModelMap(mapper),
+  );
+  createMap(
+    mapper,
+    Transaction,
+    TransactionModel,
+    extendBaseEntityToModelMap(mapper),
+  );
+  createMap(mapper, Order, OrderModel, extendBaseEntityToModelMap(mapper));
 
   createMap(mapper, ContactModel, Contact);
   createMap(mapper, CustomerModel, Customer);
   createMap(mapper, PriceModel, Price);
-  createMap(mapper, LineItemModifierModel, LineItemModifier);
-  createMap(mapper, LineItemModel, LineItem);
-  createMap(mapper, TransactionModel, Transaction);
-  createMap(mapper, OrderModel, Order);
+  createMap(
+    mapper,
+    LineItemModifierModel,
+    LineItemModifier,
+    extendBaseModelToEntityMap(mapper),
+  );
+  createMap(
+    mapper,
+    LineItemModel,
+    LineItem,
+    extendBaseModelToEntityMap(mapper),
+  );
+  createMap(
+    mapper,
+    TransactionModel,
+    Transaction,
+    extendBaseModelToEntityMap(mapper),
+  );
+  createMap(mapper, OrderModel, Order, extendBaseModelToEntityMap(mapper));
 };
 
 export const ORDER_MAPPER_TOKEN = Symbol('ORDER_MAPPER_TOKEN');
 
 export interface OrderMapper
-  extends DomainEntityMapper<Order, OrderResponseDto, OrderModel> {}
+  extends EntityMapper<Order, OrderResponseDto, OrderModel> {}
 
 export class OrderMapperImpl implements OrderMapper {
   constructor(@Inject(MAPPER_TOKEN) private readonly _mapper: Mapper) {}
