@@ -5,6 +5,7 @@ import {
   BaseEntityPayload,
   DomainError,
   createEntityId,
+  isNil,
 } from '@resnity/backend-common';
 
 import {
@@ -21,7 +22,9 @@ import {
 } from './entity/outlet.entity.types';
 import {
   CreateTablePayload,
+  TableId,
   UpdateTablePayload,
+  assertTableIdValid,
 } from './entity/table.entity.types';
 import {
   CreateRestaurantPayload,
@@ -32,7 +35,10 @@ import {
   assertRestaurantNameValid,
 } from './restaurant.aggregate-root.types';
 import { RestaurantErrorCode } from './restaurant.errors';
-import { RestaurantCreatedEvent } from './restaurant.events';
+import {
+  RestaurantCreatedEvent,
+  RestaurantRemovedEvent,
+} from './restaurant.events';
 
 export class Restaurant extends AggregateRoot<RestaurantId> {
   private _menuIds: MenuId[];
@@ -68,7 +74,7 @@ export class Restaurant extends AggregateRoot<RestaurantId> {
     restaurant.updatedAt = payload.updatedAt;
     restaurant.name = payload.name;
     restaurant.menuIds = payload.menuIds;
-    restaurant.outlets = [];
+    restaurant.outlets = payload.outlets.map(Outlet.create);
     return restaurant;
   }
 
@@ -85,13 +91,13 @@ export class Restaurant extends AggregateRoot<RestaurantId> {
   }
 
   remove() {
+    this._addEvent(new RestaurantRemovedEvent({ aggregateId: this.id }));
     return this.id;
   }
 
   addMenu(menuId: string) {
     assertMenuIdValid(menuId);
-    this._assertMenuDoesNotExists(menuId);
-    this._menuIds.push(menuId);
+    this._addMenu(menuId);
     this._setUpdatedAtToNow();
   }
 
@@ -104,25 +110,19 @@ export class Restaurant extends AggregateRoot<RestaurantId> {
 
   updateOutletById(outletId: string, payload: UpdateOutletPayload) {
     assertOutletIdValid(outletId);
-    const outlet = this._getOutletById(outletId);
-    outlet.update(payload);
+    this._updateOutletById(outletId, payload);
     this._setUpdatedAtToNow();
   }
 
   removeOutletById(outletId: string) {
     assertOutletIdValid(outletId);
-    this._getOutletById(outletId);
-    const indexToRemove = this._outlets.findIndex(
-      (outlet) => outlet.id === outletId,
-    );
-    this._outlets.splice(indexToRemove, 1);
+    this._removeOutletById(outletId);
     this._setUpdatedAtToNow();
   }
 
   addTable(outletId: string, payload: CreateTablePayload) {
     assertOutletIdValid(outletId);
-    const outlet = this._getOutletById(outletId);
-    const tableId = outlet.addTable(payload);
+    const tableId = this._addTable(outletId, payload);
     this._setUpdatedAtToNow();
     return tableId;
   }
@@ -133,36 +133,70 @@ export class Restaurant extends AggregateRoot<RestaurantId> {
     payload: UpdateTablePayload,
   ) {
     assertOutletIdValid(outletId);
-    const outlet = this._getOutletById(outletId);
-    outlet.updateTableById(tableId, payload);
+    assertTableIdValid(tableId);
+    this._updateTableById(outletId, tableId, payload);
     this._setUpdatedAtToNow();
   }
 
   removeTableById(outletId: string, tableId: string) {
     assertOutletIdValid(outletId);
-    const outlet = this._getOutletById(outletId);
-    outlet.removeTableById(tableId);
+    this._removeTableById(outletId, tableId);
     this._setUpdatedAtToNow();
   }
 
-  private _getOutletById(outletId: OutletId) {
-    const outlet = this._outlets.find((outlet) => outlet.id === outletId);
-    if (outlet === undefined)
-      throw DomainError.ofCode(
-        RestaurantErrorCode.RESTAURANT_OUTLET_DOES_NOT_EXISTS,
-      );
-    return outlet;
-  }
-
-  private _assertMenuDoesNotExists(menuId: MenuId) {
-    if (this._isMenuExists(menuId))
+  private _addMenu(menuId: MenuId) {
+    if (this._menuIds.includes(menuId))
       throw DomainError.ofCode(
         RestaurantErrorCode.RESTAURANT_MENU_ALREADY_EXISTS,
       );
+    this._menuIds.push(menuId);
   }
 
-  private _isMenuExists(menuId: MenuId) {
-    return this._menuIds.some((id) => id === menuId);
+  private _updateOutletById(outletId: OutletId, payload: UpdateOutletPayload) {
+    const outlet = this._getOutletById(outletId);
+    if (isNil(outlet))
+      throw DomainError.ofCode(RestaurantErrorCode.RESTAURANT_OUTLET_NOT_FOUND);
+    outlet.update(payload);
+  }
+
+  private _removeOutletById(outletId: OutletId) {
+    const outlet = this._getOutletById(outletId);
+    if (isNil(outlet))
+      throw DomainError.ofCode(RestaurantErrorCode.RESTAURANT_OUTLET_NOT_FOUND);
+
+    const indexToRemove = this._outlets.findIndex(
+      (outlet) => outlet.id === outletId,
+    );
+    this._outlets.splice(indexToRemove, 1);
+  }
+
+  private _addTable(outletId: OutletId, payload: CreateTablePayload) {
+    const outlet = this._getOutletById(outletId);
+    if (isNil(outlet))
+      throw DomainError.ofCode(RestaurantErrorCode.RESTAURANT_OUTLET_NOT_FOUND);
+    return outlet.addTable(payload);
+  }
+
+  private _updateTableById(
+    outletId: OutletId,
+    tableId: TableId,
+    payload: UpdateTablePayload,
+  ) {
+    const outlet = this._getOutletById(outletId);
+    if (isNil(outlet))
+      throw DomainError.ofCode(RestaurantErrorCode.RESTAURANT_OUTLET_NOT_FOUND);
+    outlet.updateTableById(tableId, payload);
+  }
+
+  private _removeTableById(outletId: OutletId, tableId: string) {
+    const outlet = this._getOutletById(outletId);
+    if (isNil(outlet))
+      throw DomainError.ofCode(RestaurantErrorCode.RESTAURANT_OUTLET_NOT_FOUND);
+    outlet.removeTableById(tableId);
+  }
+
+  private _getOutletById(outletId: OutletId) {
+    return this._outlets.find((outlet) => outlet.id === outletId);
   }
 
   @AutoMap(() => [String])

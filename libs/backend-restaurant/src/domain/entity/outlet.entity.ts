@@ -5,6 +5,7 @@ import {
   DomainError,
   Entity,
   createEntityId,
+  isNil,
 } from '@resnity/backend-common';
 
 import { MenuId, assertMenuIdsValid } from '../common/menu.types';
@@ -66,6 +67,30 @@ export class Outlet extends Entity<OutletId> {
   }
 
   update(payload: UpdateOutletPayload) {
+    this._update(payload);
+    this._setUpdatedAtToNow();
+    return this._id;
+  }
+
+  addTable(payload: CreateTablePayload) {
+    const tableId = this._addTable(payload);
+    this._setUpdatedAtToNow();
+    return tableId;
+  }
+
+  updateTableById(tableId: string, payload: UpdateTablePayload) {
+    assertTableIdValid(tableId);
+    this._updateTableById(tableId, payload);
+    this._setUpdatedAtToNow();
+  }
+
+  removeTableById(tableId: string) {
+    assertTableIdValid(tableId);
+    this._removeTableById(tableId);
+    this._setUpdatedAtToNow();
+  }
+
+  private _update(payload: UpdateOutletPayload) {
     if (payload.menuIds) {
       assertMenuIdsValid(payload.menuIds);
       this.menuIds = payload.menuIds;
@@ -87,48 +112,38 @@ export class Outlet extends Entity<OutletId> {
     if (payload.serviceSchedule) {
       this.serviceSchedule = ServiceSchedule.create(payload.serviceSchedule);
     }
-    this._setUpdatedAtToNow();
-    return this._id;
   }
 
-  addTable(payload: CreateTablePayload) {
+  private _addTable(payload: CreateTablePayload) {
     const table = Table.create(payload);
     this._tables.push(table);
-    this._setUpdatedAtToNow();
     return table.id;
   }
 
-  updateTableById(tableId: string, payload: UpdateTablePayload) {
-    assertTableIdValid(tableId);
+  private _updateTableById(tableId: TableId, payload: UpdateTablePayload) {
     const table = this._getTableById(tableId);
+    if (isNil(table))
+      throw DomainError.ofCode(
+        RestaurantErrorCode.RESTAURANT_OUTLET_TABLE_NOT_FOUND,
+      );
     table.update(payload);
-    this._setUpdatedAtToNow();
   }
 
-  removeTableById(tableId: string) {
-    assertTableIdValid(tableId);
-    this._getTableById(tableId);
+  private _removeTableById(tableId: TableId) {
+    const table = this._getTableById(tableId);
+    if (isNil(table))
+      throw DomainError.ofCode(
+        RestaurantErrorCode.RESTAURANT_OUTLET_TABLE_NOT_FOUND,
+      );
+
     const indexToRemove = this._tables.findIndex(
       (table) => table.id === tableId,
     );
     this._tables.splice(indexToRemove, 1);
-    this._setUpdatedAtToNow();
   }
 
   private _getTableById(tableId: TableId) {
-    const result = this._tables.find((table) => table.id === tableId);
-    if (result === undefined)
-      throw DomainError.ofCode(
-        RestaurantErrorCode.RESTAURANT_OUTLET_TABLE_DOES_NOT_EXISTS,
-      );
-    return result;
-  }
-
-  private _assertTableDoesNotExists(tableId: TableId) {
-    if (this._tables.some((table) => table.id === tableId))
-      throw DomainError.ofCode(
-        RestaurantErrorCode.RESTAURANT_OUTLET_TABLE_ALREADY_EXISTS,
-      );
+    return this._tables.find((table) => table.id === tableId);
   }
 
   @AutoMap(() => [String])

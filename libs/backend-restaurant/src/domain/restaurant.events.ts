@@ -8,3 +8,9 @@ export class RestaurantCreatedEvent extends DomainEvent {
     this.name = payload.name;
   }
 }
+
+export class RestaurantRemovedEvent extends DomainEvent {
+  constructor(payload: CreateEventPayload<RestaurantRemovedEvent>) {
+    super(payload);
+  }
+}

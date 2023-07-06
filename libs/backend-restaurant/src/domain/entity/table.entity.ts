@@ -45,6 +45,11 @@ export class Table extends Entity<TableId> {
   }
 
   update(payload: UpdateTablePayload) {
+    this._update(payload);
+    this._setUpdatedAtToNow();
+  }
+
+  _update(payload: UpdateTablePayload) {
     if (payload.code) {
       assertTableCodeValid(payload.code);
       this.code = payload.code;
@@ -53,7 +58,6 @@ export class Table extends Entity<TableId> {
       assertTableCapacityValid(payload.capacity);
       this.capacity = payload.capacity;
     }
-    this._setUpdatedAtToNow();
   }
 
   @AutoMap()
