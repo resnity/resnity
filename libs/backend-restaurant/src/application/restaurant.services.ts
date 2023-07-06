@@ -2,14 +2,12 @@ import { Inject } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 import {
-  AppError,
-  DomainError,
   NotFoundError,
   isNil,
+  withTransformUnknownErrorToAppError,
 } from '@resnity/backend-common';
 
 import { Restaurant } from '../domain/restaurant.aggregate-root';
-import { CreateRestaurantPayload } from '../domain/restaurant.aggregate-root.types';
 import {
   RESTAURANT_REPOSITORY_TOKEN,
   RestaurantRepository,
@@ -76,11 +74,13 @@ export class RestaurantServiceImpl implements RestaurantServices {
   }
 
   async createRestaurant(payload: CreateRestaurantServicePayload) {
-    const restaurant = this._createRestaurant({
-      menuIds: [],
-      outlets: [],
-      ...payload,
-    });
+    const restaurant = withTransformUnknownErrorToAppError(() =>
+      Restaurant.create({
+        menuIds: [],
+        outlets: [],
+        ...payload,
+      }),
+    );
 
     await this._repository.withTransaction(async () => {
       await restaurant.publishEvents(this._eventEmitter);
@@ -95,7 +95,7 @@ export class RestaurantServiceImpl implements RestaurantServices {
     payload: UpdateRestaurantServicePayload,
   ) {
     const restaurant = await this._getRestaurantById(restaurantId);
-    restaurant.update(payload);
+    withTransformUnknownErrorToAppError(() => restaurant.update(payload));
 
     await this._repository.withTransaction(async () => {
       await restaurant.publishEvents(this._eventEmitter);
@@ -105,7 +105,7 @@ export class RestaurantServiceImpl implements RestaurantServices {
 
   async removeRestaurantById(restaurantId: string) {
     const restaurant = await this._getRestaurantById(restaurantId);
-    restaurant.remove();
+    withTransformUnknownErrorToAppError(() => restaurant.remove());
 
     await this._repository.withTransaction(async () => {
       await restaurant.publishEvents(this._eventEmitter);
@@ -118,10 +118,12 @@ export class RestaurantServiceImpl implements RestaurantServices {
     payload: CreateOutletServicePayload,
   ) {
     const restaurant = await this._getRestaurantById(restaurantId);
-    const outletId = restaurant.addOutlet({
-      tables: [],
-      ...payload,
-    });
+    const outletId = withTransformUnknownErrorToAppError(() =>
+      restaurant.addOutlet({
+        tables: [],
+        ...payload,
+      }),
+    );
 
     await this._repository.withTransaction(async () => {
       await restaurant.publishEvents(this._eventEmitter);
@@ -137,7 +139,9 @@ export class RestaurantServiceImpl implements RestaurantServices {
     payload: UpdateOutletServicePayload,
   ) {
     const restaurant = await this._getRestaurantById(restaurantId);
-    restaurant.updateOutletById(outletId, payload);
+    withTransformUnknownErrorToAppError(() =>
+      restaurant.updateOutletById(outletId, payload),
+    );
 
     await this._repository.withTransaction(async () => {
       await restaurant.publishEvents(this._eventEmitter);
@@ -147,7 +151,9 @@ export class RestaurantServiceImpl implements RestaurantServices {
 
   async removeOutletById(restaurantId: string, outletId: string) {
     const restaurant = await this._getRestaurantById(restaurantId);
-    restaurant.removeOutletById(outletId);
+    withTransformUnknownErrorToAppError(() =>
+      restaurant.removeOutletById(outletId),
+    );
 
     await this._repository.withTransaction(async () => {
       await restaurant.publishEvents(this._eventEmitter);
@@ -161,7 +167,9 @@ export class RestaurantServiceImpl implements RestaurantServices {
     payload: CreateTableServicePayload,
   ) {
     const restaurant = await this._getRestaurantById(restaurantId);
-    const tableId = restaurant.addTable(outletId, payload);
+    const tableId = withTransformUnknownErrorToAppError(() =>
+      restaurant.addTable(outletId, payload),
+    );
 
     await this._repository.withTransaction(async () => {
       await restaurant.publishEvents(this._eventEmitter);
@@ -178,7 +186,9 @@ export class RestaurantServiceImpl implements RestaurantServices {
     payload: UpdateTableServicePayload,
   ) {
     const restaurant = await this._getRestaurantById(restaurantId);
-    restaurant.updateTableById(outletId, tableId, payload);
+    withTransformUnknownErrorToAppError(() =>
+      restaurant.updateTableById(outletId, tableId, payload),
+    );
 
     await this._repository.withTransaction(async () => {
       await restaurant.publishEvents(this._eventEmitter);
@@ -192,7 +202,9 @@ export class RestaurantServiceImpl implements RestaurantServices {
     tableId: string,
   ) {
     const restaurant = await this._getRestaurantById(restaurantId);
-    restaurant.removeTableById(outletId, tableId);
+    withTransformUnknownErrorToAppError(() =>
+      restaurant.removeTableById(outletId, tableId),
+    );
 
     await this._repository.withTransaction(async () => {
       await restaurant.publishEvents(this._eventEmitter);
@@ -204,13 +216,5 @@ export class RestaurantServiceImpl implements RestaurantServices {
     const result = await this._repository.findById(id);
     if (isNil(result)) throw new NotFoundError();
     return result;
-  }
-
-  private _createRestaurant(payload: CreateRestaurantPayload) {
-    try {
-      return Restaurant.create(payload);
-    } catch (err) {
-      throw AppError.fromDomain(err as DomainError);
-    }
   }
 }
