@@ -5,8 +5,6 @@ import {
   BaseEntityPayload,
   DomainError,
   createEntityId,
-  extractMapValues,
-  mapClassInstancesToMapBy,
 } from '@resnity/backend-common';
 
 import {
@@ -37,9 +35,9 @@ import { RestaurantErrorCode } from './restaurant.errors';
 import { RestaurantCreatedEvent } from './restaurant.events';
 
 export class Restaurant extends AggregateRoot<RestaurantId> {
-  private _menuIds: Set<MenuId>;
+  private _menuIds: MenuId[];
   private _name: RestaurantName;
-  private _outlets: Map<OutletId, Outlet>;
+  private _outlets: Outlet[];
 
   static create(payload: CreateRestaurantPayload) {
     const restaurant = Restaurant.new({
@@ -77,7 +75,7 @@ export class Restaurant extends AggregateRoot<RestaurantId> {
   update(payload: UpdateRestaurantPayload) {
     if (payload.menuIds !== undefined) {
       assertMenuIdsValid(payload.menuIds);
-      this._menuIds = new Set(payload.menuIds);
+      this._menuIds = payload.menuIds;
     }
     if (payload.name !== undefined) {
       assertRestaurantNameValid(payload.name);
@@ -93,13 +91,13 @@ export class Restaurant extends AggregateRoot<RestaurantId> {
   addMenu(menuId: string) {
     assertMenuIdValid(menuId);
     this._assertMenuDoesNotExists(menuId);
-    this._menuIds.add(menuId);
+    this._menuIds.push(menuId);
     this._setUpdatedAtToNow();
   }
 
   addOutlet(payload: CreateOutletPayload) {
     const outlet = Outlet.create(payload);
-    this._outlets.set(outlet.id, outlet);
+    this._outlets.push(outlet);
     this._setUpdatedAtToNow();
     return outlet.id;
   }
@@ -114,7 +112,10 @@ export class Restaurant extends AggregateRoot<RestaurantId> {
   removeOutletById(outletId: string) {
     assertOutletIdValid(outletId);
     this._getOutletById(outletId);
-    this._outlets.delete(outletId);
+    const indexToRemove = this._outlets.findIndex(
+      (outlet) => outlet.id === outletId,
+    );
+    this._outlets.splice(indexToRemove, 1);
     this._setUpdatedAtToNow();
   }
 
@@ -145,7 +146,7 @@ export class Restaurant extends AggregateRoot<RestaurantId> {
   }
 
   private _getOutletById(outletId: OutletId) {
-    const outlet = this._outlets.get(outletId);
+    const outlet = this._outlets.find((outlet) => outlet.id === outletId);
     if (outlet === undefined)
       throw DomainError.ofCode(
         RestaurantErrorCode.RESTAURANT_OUTLET_DOES_NOT_EXISTS,
@@ -154,18 +155,22 @@ export class Restaurant extends AggregateRoot<RestaurantId> {
   }
 
   private _assertMenuDoesNotExists(menuId: MenuId) {
-    if (this._menuIds.has(menuId))
+    if (this._isMenuExists(menuId))
       throw DomainError.ofCode(
         RestaurantErrorCode.RESTAURANT_MENU_ALREADY_EXISTS,
       );
   }
 
+  private _isMenuExists(menuId: MenuId) {
+    return this._menuIds.some((id) => id === menuId);
+  }
+
   @AutoMap(() => [String])
   get menuIds(): MenuId[] {
-    return Array.from(this._menuIds);
+    return this._menuIds;
   }
   set menuIds(value: MenuId[]) {
-    this._menuIds = new Set(value);
+    this._menuIds = value;
   }
 
   @AutoMap(() => String)
@@ -178,9 +183,9 @@ export class Restaurant extends AggregateRoot<RestaurantId> {
 
   @AutoMap(() => [Outlet])
   get outlets(): Outlet[] {
-    return extractMapValues(this._outlets);
+    return this._outlets;
   }
   set outlets(value: Outlet[]) {
-    this._outlets = mapClassInstancesToMapBy(value, 'id');
+    this._outlets = value;
   }
 }

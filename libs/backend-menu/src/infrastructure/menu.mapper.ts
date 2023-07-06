@@ -4,7 +4,9 @@ import { Inject } from '@nestjs/common';
 import {
   EntityMapper,
   MAPPER_TOKEN,
-  extendBaseMaps,
+  extendBaseEntityToModelMap,
+  extendBaseEntityToResponseDtoMap,
+  extendBaseModelToEntityMap,
 } from '@resnity/backend-common';
 
 import {
@@ -31,28 +33,66 @@ import {
 } from './menu.models';
 
 export const menuMappingProfile: MappingProfile = (mapper: Mapper) => {
-  extendBaseMaps(mapper);
-
   createMap(mapper, TimePeriod, TimePeriodResponseDto);
   createMap(mapper, ServiceSchedule, ServiceScheduleResponseDto);
-  createMap(mapper, Category, CategoryResponseDto);
-  createMap(mapper, Item, ItemResponseDto);
-  createMap(mapper, Modifier, ModifierResponseDto);
-  createMap(mapper, Menu, MenuResponseDto);
+  createMap(
+    mapper,
+    Category,
+    CategoryResponseDto,
+    extendBaseEntityToResponseDtoMap(mapper),
+  );
+  createMap(
+    mapper,
+    Item,
+    ItemResponseDto,
+    extendBaseEntityToResponseDtoMap(mapper),
+  );
+  createMap(
+    mapper,
+    Modifier,
+    ModifierResponseDto,
+    extendBaseEntityToResponseDtoMap(mapper),
+  );
+  createMap(
+    mapper,
+    Menu,
+    MenuResponseDto,
+    extendBaseEntityToResponseDtoMap(mapper),
+  );
 
   createMap(mapper, TimePeriod, TimePeriodModel);
   createMap(mapper, ServiceSchedule, ServiceScheduleModel);
-  createMap(mapper, Category, CategoryModel);
-  createMap(mapper, Item, ItemModel);
-  createMap(mapper, Modifier, ModifierModel);
-  createMap(mapper, Menu, MenuModel);
+  createMap(
+    mapper,
+    Category,
+    CategoryModel,
+    extendBaseEntityToModelMap(mapper),
+  );
+  createMap(mapper, Item, ItemModel, extendBaseEntityToModelMap(mapper));
+  createMap(
+    mapper,
+    Modifier,
+    ModifierModel,
+    extendBaseEntityToModelMap(mapper),
+  );
+  createMap(mapper, Menu, MenuModel, extendBaseEntityToModelMap(mapper));
 
   createMap(mapper, TimePeriodModel, TimePeriod);
   createMap(mapper, ServiceScheduleModel, ServiceSchedule);
-  createMap(mapper, CategoryModel, Category);
-  createMap(mapper, ItemModel, Item);
-  createMap(mapper, ModifierModel, Modifier);
-  createMap(mapper, MenuModel, Menu);
+  createMap(
+    mapper,
+    CategoryModel,
+    Category,
+    extendBaseModelToEntityMap(mapper),
+  );
+  createMap(mapper, ItemModel, Item, extendBaseModelToEntityMap(mapper));
+  createMap(
+    mapper,
+    ModifierModel,
+    Modifier,
+    extendBaseModelToEntityMap(mapper),
+  );
+  createMap(mapper, MenuModel, Menu, extendBaseModelToEntityMap(mapper));
 };
 
 export const MENU_MAPPER_TOKEN = Symbol('MENU_MAPPER_TOKEN');

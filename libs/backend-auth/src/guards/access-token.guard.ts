@@ -5,9 +5,13 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { Terminal } from 'nestjs-cls';
 
-import { AppClsService, UnauthorizedError } from '@resnity/backend-common';
+import {
+  APP_CLS_TENANT_ID,
+  APP_CLS_USER,
+  AppClsService,
+  UnauthorizedError,
+} from '@resnity/backend-common';
 
 import { AUTH_SERVICE_TOKEN, JWT_SERVICE_TOKEN } from '../auth.constants';
 import { JwtService } from '../jwt/jwt.service';
@@ -35,8 +39,8 @@ export class AccessTokenGuard implements CanActivate {
 
       user.permissions = jwtPayload.permissions;
 
-      this._appClsService.set('tenantId', orgId);
-      this._appClsService.setUser(user);
+      this._appClsService.set(APP_CLS_TENANT_ID, orgId);
+      this._appClsService.set(APP_CLS_USER, user);
 
       request.user = user;
     } catch (err) {

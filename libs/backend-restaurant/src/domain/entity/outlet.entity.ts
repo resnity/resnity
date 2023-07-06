@@ -5,8 +5,6 @@ import {
   DomainError,
   Entity,
   createEntityId,
-  extractMapValues,
-  mapClassInstancesToMapBy,
 } from '@resnity/backend-common';
 
 import { MenuId, assertMenuIdsValid } from '../common/menu.types';
@@ -32,10 +30,10 @@ import {
 } from './table.entity.types';
 
 export class Outlet extends Entity<OutletId> {
-  private _menuIds: Set<MenuId>;
-  private _orderIds: Set<OrderId>;
+  private _menuIds: MenuId[];
+  private _orderIds: OrderId[];
   private _name: OutletName;
-  private _tables: Map<TableId, Table>;
+  private _tables: Table[];
   private _address: Address;
   private _contact: Contact;
   private _serviceSchedule: ServiceSchedule;
@@ -95,7 +93,7 @@ export class Outlet extends Entity<OutletId> {
 
   addTable(payload: CreateTablePayload) {
     const table = Table.create(payload);
-    this._tables.set(table.id, table);
+    this._tables.push(table);
     this._setUpdatedAtToNow();
     return table.id;
   }
@@ -110,12 +108,15 @@ export class Outlet extends Entity<OutletId> {
   removeTableById(tableId: string) {
     assertTableIdValid(tableId);
     this._getTableById(tableId);
-    this._tables.delete(tableId);
+    const indexToRemove = this._tables.findIndex(
+      (table) => table.id === tableId,
+    );
+    this._tables.splice(indexToRemove, 1);
     this._setUpdatedAtToNow();
   }
 
   private _getTableById(tableId: TableId) {
-    const result = this._tables.get(tableId);
+    const result = this._tables.find((table) => table.id === tableId);
     if (result === undefined)
       throw DomainError.ofCode(
         RestaurantErrorCode.RESTAURANT_OUTLET_TABLE_DOES_NOT_EXISTS,
@@ -124,7 +125,7 @@ export class Outlet extends Entity<OutletId> {
   }
 
   private _assertTableDoesNotExists(tableId: TableId) {
-    if (this._tables.has(tableId))
+    if (this._tables.some((table) => table.id === tableId))
       throw DomainError.ofCode(
         RestaurantErrorCode.RESTAURANT_OUTLET_TABLE_ALREADY_EXISTS,
       );
@@ -132,18 +133,18 @@ export class Outlet extends Entity<OutletId> {
 
   @AutoMap(() => [String])
   get menuIds(): MenuId[] {
-    return Array.from(this._menuIds);
+    return this._menuIds;
   }
   set menuIds(value: MenuId[]) {
-    this._menuIds = new Set(value);
+    this._menuIds = value;
   }
 
   @AutoMap(() => [String])
   get orderIds(): OrderId[] {
-    return Array.from(this._orderIds);
+    return this._orderIds;
   }
   set orderIds(value: OrderId[]) {
-    this._orderIds = new Set(value);
+    this._orderIds = value;
   }
 
   @AutoMap()
@@ -156,10 +157,10 @@ export class Outlet extends Entity<OutletId> {
 
   @AutoMap(() => [Table])
   get tables(): Table[] {
-    return extractMapValues(this._tables);
+    return this._tables;
   }
   set tables(value: Table[]) {
-    this._tables = mapClassInstancesToMapBy(value, 'id');
+    this._tables = value;
   }
 
   @AutoMap(() => Address)

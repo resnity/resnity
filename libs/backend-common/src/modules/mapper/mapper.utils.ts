@@ -12,8 +12,7 @@ import {
 
 import { ResponseDto } from '../../api/response-dtos';
 import { Entity } from '../../domain/entity';
-import { ValueObject } from '../../domain/value-object';
-import { EmbeddedModel, Model } from '../../infrastructure/models';
+import { Model } from '../../infrastructure/models';
 
 export const MAPPER_TOKEN = Symbol('MAPPER_TOKEN');
 
@@ -21,8 +20,10 @@ export const mapper = createMapper({
   strategyInitializer: classes(),
 });
 
-export const extendBaseMaps = (mapper: Mapper) => {
+export const extendBaseEntityToResponseDtoMap = (mapper: Mapper) =>
   extend(createMap(mapper, Entity, ResponseDto));
+
+export const extendBaseEntityToModelMap = (mapper: Mapper) =>
   extend(
     createMap(
       mapper,
@@ -34,7 +35,8 @@ export const extendBaseMaps = (mapper: Mapper) => {
       ),
     ),
   );
-  extend(createMap(mapper, ValueObject, EmbeddedModel));
+
+export const extendBaseModelToEntityMap = (mapper: Mapper) =>
   extend(
     createMap(
       mapper,
@@ -46,8 +48,6 @@ export const extendBaseMaps = (mapper: Mapper) => {
       ),
     ),
   );
-  extend(createMap(mapper, EmbeddedModel, ValueObject));
-};
 
 export const initMappingProfile = (
   mapper: Mapper,

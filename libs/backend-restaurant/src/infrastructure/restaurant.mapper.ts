@@ -4,7 +4,9 @@ import { Inject } from '@nestjs/common';
 import {
   EntityMapper,
   MAPPER_TOKEN,
-  extendBaseMaps,
+  extendBaseEntityToModelMap,
+  extendBaseEntityToResponseDtoMap,
+  extendBaseModelToEntityMap,
 } from '@resnity/backend-common';
 
 import {
@@ -34,31 +36,54 @@ import {
 } from './restaurant.models';
 
 export const restaurantMappingProfile: MappingProfile = (mapper) => {
-  extendBaseMaps(mapper);
-
   createMap(mapper, Address, AddressResponseDto);
   createMap(mapper, Contact, ContactResponseDto);
   createMap(mapper, TimePeriod, TimePeriodResponseDto);
   createMap(mapper, ServiceSchedule, ServiceScheduleResponseDto);
-  createMap(mapper, Table, TableResponseDto);
-  createMap(mapper, Outlet, OutletResponseDto);
-  createMap(mapper, Restaurant, RestaurantResponseDto);
+  createMap(
+    mapper,
+    Table,
+    TableResponseDto,
+    extendBaseEntityToResponseDtoMap(mapper),
+  );
+  createMap(
+    mapper,
+    Outlet,
+    OutletResponseDto,
+    extendBaseEntityToResponseDtoMap(mapper),
+  );
+  createMap(
+    mapper,
+    Restaurant,
+    RestaurantResponseDto,
+    extendBaseEntityToResponseDtoMap(mapper),
+  );
 
   createMap(mapper, Address, AddressModel);
   createMap(mapper, Contact, ContactModel);
   createMap(mapper, TimePeriod, TimePeriodModel);
   createMap(mapper, ServiceSchedule, ServiceScheduleModel);
-  createMap(mapper, Table, TableModel);
-  createMap(mapper, Outlet, OutletModel);
-  createMap(mapper, Restaurant, RestaurantModel);
+  createMap(mapper, Table, TableModel, extendBaseEntityToModelMap(mapper));
+  createMap(mapper, Outlet, OutletModel, extendBaseEntityToModelMap(mapper));
+  createMap(
+    mapper,
+    Restaurant,
+    RestaurantModel,
+    extendBaseEntityToModelMap(mapper),
+  );
 
   createMap(mapper, AddressModel, Address);
   createMap(mapper, ContactModel, Contact);
   createMap(mapper, TimePeriodModel, TimePeriod);
   createMap(mapper, ServiceScheduleModel, ServiceSchedule);
-  createMap(mapper, TableModel, Table);
-  createMap(mapper, OutletModel, Outlet);
-  createMap(mapper, RestaurantModel, Restaurant);
+  createMap(mapper, TableModel, Table, extendBaseModelToEntityMap(mapper));
+  createMap(mapper, OutletModel, Outlet, extendBaseModelToEntityMap(mapper));
+  createMap(
+    mapper,
+    RestaurantModel,
+    Restaurant,
+    extendBaseModelToEntityMap(mapper),
+  );
 };
 
 export const RESTAURANT_MAPPER_TOKEN = Symbol('RESTAURANT_MAPPER_TOKEN');

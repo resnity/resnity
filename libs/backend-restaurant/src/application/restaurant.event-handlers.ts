@@ -25,17 +25,17 @@ export class RestaurantEventHandlersImpl implements RestaurantEventHandlers {
 
   async menuCreated(payload: MenuCreatedEventHandlerPayload) {
     const restaurant = await this._getRestaurantById(payload.restaurantId);
-    this._addMenuId(restaurant, payload.menuId);
+    this._addMenu(restaurant, payload.menuId);
     await this._repository.update(restaurant);
   }
 
   private async _getRestaurantById(id: string) {
     const result = await this._repository.findById(id);
-    if (!result) throw new NotFoundError();
+    if (result === undefined) throw new NotFoundError();
     return result;
   }
 
-  private _addMenuId(restaurant: Restaurant, menuId: string) {
+  private _addMenu(restaurant: Restaurant, menuId: string) {
     try {
       restaurant.addMenu(menuId);
     } catch (err) {
