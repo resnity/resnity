@@ -112,7 +112,10 @@ export class RestaurantServiceImpl implements RestaurantServices {
     payload: CreateOutletServicePayload,
   ) {
     const restaurant = await this._getRestaurantById(restaurantId);
-    const outletId = restaurant.addOutlet(payload);
+    const outletId = restaurant.addOutlet({
+      tables: [],
+      ...payload,
+    });
 
     await this._repository.withTransaction(async () => {
       await this._repository.update(restaurant);

@@ -1,30 +1,61 @@
 import { z } from 'zod';
 
-import { BaseEntityPayload, EntityId } from '@resnity/backend-common';
+import {
+  EntityId,
+  Validate,
+  domainSchemaValidatorBuilder,
+} from '@resnity/backend-common';
 
-import { Price } from '../value-objects/price.value-object';
-import { ItemId } from './item.entity.types';
+import { CreatePricePayload } from '../value-objects/price.value-object.types';
 
-export const ModifierId = EntityId.brand<'ModifierId'>();
-export type ModifierId = z.infer<typeof ModifierId>;
+const modifierIdSchema = EntityId.brand<'ModifierId'>();
+const modifierIdsSchema = modifierIdSchema.array();
 
-export const ModifierItemId = ItemId;
-export type ModifierItemId = z.infer<typeof ModifierId>;
+const modifierNameSchema = z.string().min(2).max(50).brand<'ModifierName'>();
 
-export const ModifierName = z.string().min(2).max(50).brand<'ModifierName'>();
-export type ModifierName = z.infer<typeof ModifierName>;
+const modifierMinSelectionSchema = z
+  .number()
+  .int()
+  .nonnegative()
+  .brand<'ModifierMinSelection'>();
 
-export const ModifierMinSelection = z.number().int().nonnegative();
-export type ModifierMinSelection = z.infer<typeof ModifierMinSelection>;
+const modifierMaxSelectionSchema = z
+  .number()
+  .int()
+  .nonnegative()
+  .brand<'ModifierMaxSelection'>();
 
-export const ModifierMaxSelection = z.number().int().nonnegative();
-export type ModifierMaxSelection = z.infer<typeof ModifierMaxSelection>;
+const modifierIsRepeatableSchema = z.boolean().brand<'ModifierIsRepeatable'>();
 
-export const ModifierIsRepeatable = z.boolean();
-export type ModifierIsRepeatable = z.infer<typeof ModifierIsRepeatable>;
+export const assertModifierIdValid: Validate<typeof modifierIdSchema> =
+  domainSchemaValidatorBuilder(modifierIdSchema);
+export const assertModifierIdsValid: Validate<typeof modifierIdsSchema> =
+  domainSchemaValidatorBuilder(modifierIdsSchema);
 
-export const ModifierPrice = z.instanceof(Price);
-export type ModifierPrice = z.infer<typeof ModifierPrice>;
+export const assertModifierNameValid: Validate<typeof modifierNameSchema> =
+  domainSchemaValidatorBuilder(modifierNameSchema);
+
+export const assertModifierMinSelectionValid: Validate<
+  typeof modifierMinSelectionSchema
+> = domainSchemaValidatorBuilder(modifierMinSelectionSchema);
+
+export const assertModifierMaxSelectionValid: Validate<
+  typeof modifierMaxSelectionSchema
+> = domainSchemaValidatorBuilder(modifierMaxSelectionSchema);
+
+export const assertModifierIsRepeatableValid: Validate<
+  typeof modifierIsRepeatableSchema
+> = domainSchemaValidatorBuilder(modifierIsRepeatableSchema);
+
+export type ModifierId = z.infer<typeof modifierIdSchema>;
+
+export type ModifierName = z.infer<typeof modifierNameSchema>;
+
+export type ModifierMinSelection = z.infer<typeof modifierMinSelectionSchema>;
+
+export type ModifierMaxSelection = z.infer<typeof modifierMaxSelectionSchema>;
+
+export type ModifierIsRepeatable = z.infer<typeof modifierIsRepeatableSchema>;
 
 export type CreateModifierPayload = {
   itemId: string;
@@ -32,7 +63,5 @@ export type CreateModifierPayload = {
   minSelection: number;
   maxSelection: number;
   isRepeatable: boolean;
-  price: Price;
+  price: CreatePricePayload;
 };
-
-export type NewModifierPayload = BaseEntityPayload<CreateModifierPayload>;

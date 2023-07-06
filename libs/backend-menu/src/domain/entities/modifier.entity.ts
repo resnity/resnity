@@ -1,18 +1,13 @@
 import { AutoMap } from '@automapper/classes';
 
-import { Entity, createEntityId } from '@resnity/backend-common';
+import {
+  BaseEntityPayload,
+  Entity,
+  createEntityId,
+} from '@resnity/backend-common';
 
 import { Price } from '../value-objects/price.value-object';
-import { assertItemId } from './item.entity.assertions';
-import { ItemId } from './item.entity.types';
-import {
-  assertModifierId,
-  assertModifierIsRepeatable,
-  assertModifierMaxSelection,
-  assertModifierMinSelection,
-  assertModifierName,
-  assertModifierPrice,
-} from './modifier.entity.assertions';
+import { ItemId, assertItemIdValid } from './item.entity.types';
 import {
   CreateModifierPayload,
   ModifierId,
@@ -20,8 +15,11 @@ import {
   ModifierMaxSelection,
   ModifierMinSelection,
   ModifierName,
-  ModifierPrice,
-  NewModifierPayload,
+  assertModifierIdValid,
+  assertModifierIsRepeatableValid,
+  assertModifierMaxSelectionValid,
+  assertModifierMinSelectionValid,
+  assertModifierNameValid,
 } from './modifier.entity.types';
 
 export class Modifier extends Entity<ModifierId> {
@@ -30,7 +28,7 @@ export class Modifier extends Entity<ModifierId> {
   private _minSelection: ModifierMinSelection;
   private _maxSelection: ModifierMaxSelection;
   private _isRepeatable: ModifierIsRepeatable;
-  private _price: ModifierPrice;
+  private _price: Price;
 
   static create(payload: CreateModifierPayload) {
     return Modifier.new({
@@ -41,14 +39,13 @@ export class Modifier extends Entity<ModifierId> {
     });
   }
 
-  static new(payload: NewModifierPayload) {
-    assertModifierId(payload.id);
-    assertItemId(payload.itemId);
-    assertModifierName(payload.name);
-    assertModifierMinSelection(payload.minSelection);
-    assertModifierMaxSelection(payload.maxSelection);
-    assertModifierIsRepeatable(payload.isRepeatable);
-    assertModifierPrice(payload.price);
+  static new(payload: BaseEntityPayload<CreateModifierPayload>) {
+    assertModifierIdValid(payload.id);
+    assertItemIdValid(payload.itemId);
+    assertModifierNameValid(payload.name);
+    assertModifierMinSelectionValid(payload.minSelection);
+    assertModifierMaxSelectionValid(payload.maxSelection);
+    assertModifierIsRepeatableValid(payload.isRepeatable);
 
     const modifier = new Modifier();
     modifier.id = payload.id;
@@ -59,7 +56,7 @@ export class Modifier extends Entity<ModifierId> {
     modifier.minSelection = payload.minSelection;
     modifier.maxSelection = payload.maxSelection;
     modifier.isRepeatable = payload.isRepeatable;
-    modifier.price = payload.price;
+    modifier.price = Price.create(payload.price);
     return modifier;
   }
 
@@ -104,10 +101,10 @@ export class Modifier extends Entity<ModifierId> {
   }
 
   @AutoMap(() => Price)
-  get price(): ModifierPrice {
+  get price(): Price {
     return this._price;
   }
-  set price(value: ModifierPrice) {
+  set price(value: Price) {
     this._price = value;
   }
 }

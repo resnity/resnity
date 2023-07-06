@@ -2,41 +2,33 @@ import { AutoMap } from '@automapper/classes';
 
 import {
   AggregateRoot,
+  BaseEntityPayload,
   DomainError,
   createEntityId,
-  extractMapValues,
-  mapClassInstancesToMapBy,
 } from '@resnity/backend-common';
 
-import { Category } from './entities/category.entity';
-import { assertCategoryId } from './entities/category.entity.assertions';
-import { CategoryId } from './entities/category.entity.types';
-import { Item } from './entities/item.entity';
-import { assertItemId } from './entities/item.entity.assertions';
-import { ItemId } from './entities/item.entity.types';
-import { Modifier } from './entities/modifier.entity';
-import { assertModifierId } from './entities/modifier.entity.assertions';
-import { ModifierId } from './entities/modifier.entity.types';
 import {
-  assertMenuCategories,
-  assertMenuCategory,
-  assertMenuId,
-  assertMenuItem,
-  assertMenuItems,
-  assertMenuModifier,
-  assertMenuModifiers,
-  assertMenuName,
-  assertMenuRestaurantId,
-} from './menu.aggregate-root.assertions';
+  RestaurantId,
+  assertRestaurantIdValid,
+} from './common/restaurant.types';
+import { Category } from './entities/category.entity';
+import {
+  CategoryId,
+  assertCategoryIdValid,
+} from './entities/category.entity.types';
+import { Item } from './entities/item.entity';
+import { ItemId, assertItemIdValid } from './entities/item.entity.types';
+import { Modifier } from './entities/modifier.entity';
+import {
+  ModifierId,
+  assertModifierIdValid,
+} from './entities/modifier.entity.types';
 import {
   CreateMenuPayload,
-  MenuCategory,
   MenuId,
-  MenuItem,
-  MenuModifier,
   MenuName,
-  MenuRestaurantId,
-  NewMenuPayload,
+  assertMenuIdValid,
+  assertMenuNameValid,
 } from './menu.aggregate-root.types';
 import {
   CategoryAddedDomainEvent,
@@ -50,14 +42,14 @@ import {
 import { MenuErrorCode } from './menu.errors';
 
 export class Menu extends AggregateRoot<MenuId> {
-  private _restaurantId: MenuRestaurantId;
+  private _restaurantId: RestaurantId;
   private _name: MenuName;
-  private _categories: Map<CategoryId, MenuCategory>;
-  private _items: Map<ItemId, MenuItem>;
-  private _modifiers: Map<ModifierId, MenuModifier>;
+  private _categories: Category[];
+  private _items: Item[];
+  private _modifiers: Modifier[];
 
   static async create(payload: CreateMenuPayload) {
-    const menu = await Menu.new({
+    const menu = Menu.new({
       id: createEntityId(),
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -75,13 +67,10 @@ export class Menu extends AggregateRoot<MenuId> {
     return menu;
   }
 
-  static new(payload: NewMenuPayload) {
-    assertMenuId(payload.id);
-    assertMenuRestaurantId(payload.restaurantId);
-    assertMenuName(payload.name);
-    assertMenuCategories(payload.categories);
-    assertMenuItems(payload.items);
-    assertMenuModifiers(payload.modifiers);
+  static new(payload: BaseEntityPayload<CreateMenuPayload>) {
+    assertMenuIdValid(payload.id);
+    assertRestaurantIdValid(payload.restaurantId);
+    assertMenuNameValid(payload.name);
 
     const menu = new Menu();
     menu.id = payload.id;
@@ -89,15 +78,13 @@ export class Menu extends AggregateRoot<MenuId> {
     menu.updatedAt = payload.updatedAt;
     menu.restaurantId = payload.restaurantId;
     menu.name = payload.name;
-    menu.categories = payload.categories;
-    menu.items = payload.items;
-    menu.modifiers = payload.modifiers;
+    menu.categories = payload.categories.map(Category.create);
+    menu.items = payload.items.map(Item.create);
+    menu.modifiers = payload.modifiers.map(Modifier.create);
     return menu;
   }
 
   addCategory(category: Category) {
-    assertMenuCategory(category);
-
     this._addCategory(category);
     this._addEvent(
       new CategoryAddedDomainEvent({
@@ -110,8 +97,6 @@ export class Menu extends AggregateRoot<MenuId> {
   }
 
   addItem(item: Item) {
-    assertMenuItem(item);
-
     this._addItem(item);
     this._addEvent(
       new ItemAddedDomainEvent({
@@ -124,8 +109,6 @@ export class Menu extends AggregateRoot<MenuId> {
   }
 
   addModifier(modifier: Modifier) {
-    assertMenuModifier(modifier);
-
     this._addModifier(modifier);
     this._addEvent(
       new ModifierAddedDomainEvent({
@@ -138,7 +121,7 @@ export class Menu extends AggregateRoot<MenuId> {
   }
 
   removeCategoryById(id: string) {
-    assertCategoryId(id);
+    assertCategoryIdValid(id);
 
     this._removeCategoryById(id);
     this._addEvent(
@@ -151,7 +134,7 @@ export class Menu extends AggregateRoot<MenuId> {
   }
 
   removeItemById(id: string) {
-    assertItemId(id);
+    assertItemIdValid(id);
 
     this._removeItemById(id);
     this._addEvent(
@@ -164,7 +147,7 @@ export class Menu extends AggregateRoot<MenuId> {
   }
 
   removeModifierById(id: string) {
-    assertModifierId(id);
+    assertModifierIdValid(id);
 
     this._removeModifierById(id);
     this._addEvent(
@@ -176,45 +159,48 @@ export class Menu extends AggregateRoot<MenuId> {
     this._setUpdatedAtToNow();
   }
 
-  private _addCategory(category: MenuCategory) {
+  private _addCategory(category: Category) {
     if (!this._isCategoryExistsByName(category.name))
       throw DomainError.ofCode(MenuErrorCode.MENU_CATEGORY_NAME_ALREADY_EXISTS);
     if (!this._areAllCategoryItemsExistByIdInMenu(category.itemIds))
       throw DomainError.ofCode(MenuErrorCode.MENU_ITEM_NOT_FOUND);
 
-    this._categories.set(category.id, category);
+    this._categories.push(category);
   }
 
-  private _addItem(item: MenuItem) {
+  private _addItem(item: Item) {
     if (!this._isItemExistsByName(item.name))
       throw DomainError.ofCode(MenuErrorCode.MENU_ITEM_NAME_ALREADY_EXISTS);
 
-    this._items.set(item.id, item);
+    this._items.push(item);
   }
 
-  private _addModifier(modifier: MenuModifier) {
+  private _addModifier(modifier: Modifier) {
     if (!this._isModifierExistsByName(modifier.name))
       throw DomainError.ofCode(MenuErrorCode.MENU_MODIFIER_NAME_ALREADY_EXISTS);
 
-    this._modifiers.set(modifier.id, modifier);
+    this._modifiers.push(modifier);
   }
 
   private _removeCategoryById(categoryId: CategoryId) {
     if (!this._isCategoryExistsById(categoryId))
       throw DomainError.ofCode(MenuErrorCode.MENU_CATEGORY_NOT_FOUND);
 
-    this._categories.delete(categoryId);
+    const indexToRemove = this._categories.findIndex(
+      (category) => category.id === categoryId,
+    );
+    this._categories.splice(indexToRemove, 1);
   }
 
   private _removeItemById(itemId: ItemId) {
     if (!this._isItemExistsById(itemId))
       throw DomainError.ofCode(MenuErrorCode.MENU_ITEM_NOT_FOUND);
 
-    this._items.delete(itemId);
-    extractMapValues(this._categories).forEach((category) =>
-      category.removeItemById(itemId),
-    );
-    extractMapValues(this._modifiers)
+    const indexToRemove = this._items.findIndex((item) => item.id === itemId);
+    this._items.splice(indexToRemove, 1);
+
+    this._categories.forEach((category) => category.removeItemById(itemId));
+    this._modifiers
       .filter((modifier) => modifier.itemId === itemId)
       .forEach((modifier) => this._removeModifierById(modifier.id));
   }
@@ -223,7 +209,10 @@ export class Menu extends AggregateRoot<MenuId> {
     if (!this._isModifierExistsById(modifierId))
       throw DomainError.ofCode(MenuErrorCode.MENU_MODIFIER_NOT_FOUND);
 
-    this._modifiers.delete(modifierId);
+    const indexToRemove = this._modifiers.findIndex(
+      (modifier) => modifier.id === modifierId,
+    );
+    this._modifiers.splice(indexToRemove, 1);
   }
 
   private _areAllCategoryItemsExistByIdInMenu(itemIds: ItemId[]) {
@@ -236,43 +225,35 @@ export class Menu extends AggregateRoot<MenuId> {
     return this._isItemExistsById(itemId);
   }
 
-  private _getCategoryById(categoryId: CategoryId) {
-    return this._categories.get(categoryId);
-  }
-
   private _isCategoryExistsById(categoryId: CategoryId) {
-    return this._categories.has(categoryId);
+    return this._categories.some((category) => category.id === categoryId);
   }
 
   private _isItemExistsById(itemId: ItemId) {
-    return this._items.has(itemId);
+    return this._items.some((item) => item.id === itemId);
   }
 
   private _isModifierExistsById(modifierId: ModifierId) {
-    return this._modifiers.has(modifierId);
+    return this._modifiers.some((modifier) => modifier.id === modifierId);
   }
 
   private _isCategoryExistsByName(name: string) {
-    return extractMapValues(this._categories).every(
-      (category) => category.name !== name,
-    );
+    return this._categories.some((category) => category.name === name);
   }
 
   private _isItemExistsByName(name: string) {
-    return extractMapValues(this._items).every((item) => item.name !== name);
+    return this._items.some((item) => item.name === name);
   }
 
   private _isModifierExistsByName(name: string) {
-    return extractMapValues(this._modifiers).every(
-      (modifier) => modifier.name !== name,
-    );
+    return this._modifiers.some((modifier) => modifier.name === name);
   }
 
   @AutoMap(() => String)
-  get restaurantId(): MenuRestaurantId {
+  get restaurantId(): RestaurantId {
     return this._restaurantId;
   }
-  set restaurantId(value: MenuRestaurantId) {
+  set restaurantId(value: RestaurantId) {
     this._restaurantId = value;
   }
 
@@ -285,26 +266,26 @@ export class Menu extends AggregateRoot<MenuId> {
   }
 
   @AutoMap(() => [Category])
-  get categories(): MenuCategory[] {
-    return extractMapValues(this._categories);
+  get categories(): Category[] {
+    return this._categories;
   }
-  set categories(value: MenuCategory[]) {
-    this._categories = mapClassInstancesToMapBy(value, 'id');
+  set categories(value: Category[]) {
+    this._categories = value;
   }
 
   @AutoMap(() => [Item])
-  get items(): MenuItem[] {
-    return extractMapValues(this._items);
+  get items(): Item[] {
+    return this._items;
   }
-  set items(value: MenuItem[]) {
-    this._items = mapClassInstancesToMapBy(value, 'id');
+  set items(value: Item[]) {
+    this._items = value;
   }
 
   @AutoMap(() => [Modifier])
-  get modifiers(): MenuModifier[] {
-    return extractMapValues(this._modifiers);
+  get modifiers(): Modifier[] {
+    return this._modifiers;
   }
-  set modifiers(value: MenuModifier[]) {
-    this._modifiers = mapClassInstancesToMapBy(value, 'id');
+  set modifiers(value: Modifier[]) {
+    this._modifiers = value;
   }
 }

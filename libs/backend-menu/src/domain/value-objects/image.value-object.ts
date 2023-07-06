@@ -2,8 +2,11 @@ import { AutoMap } from '@automapper/classes';
 
 import { ValueObject } from '@resnity/backend-common';
 
-import { assertImageUrl } from './image.value-object.assertions';
-import { CreateImagePayload, ImageUrl } from './image.value-object.types';
+import {
+  CreateImagePayload,
+  ImageUrl,
+  assertImageUrlValid,
+} from './image.value-object.types';
 
 export class Image extends ValueObject {
   private _url: ImageUrl;
@@ -13,7 +16,8 @@ export class Image extends ValueObject {
   }
 
   static new(payload: CreateImagePayload) {
-    assertImageUrl(payload.url);
+    assertImageUrlValid(payload.url);
+
     const image = new Image();
     image.url = payload.url;
     return image;

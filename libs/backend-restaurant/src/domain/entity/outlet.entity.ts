@@ -58,7 +58,7 @@ export class Outlet extends Entity<OutletId> {
     outlet.menuIds = payload.menuIds;
     outlet.orderIds = payload.orderIds;
     outlet.name = payload.name;
-    outlet.tables = [];
+    outlet.tables = payload.tables.map(Table.create);
     outlet.address = Address.create(payload.address);
     outlet.contact = Contact.create(payload.contact);
     outlet.serviceSchedule = ServiceSchedule.create(payload.serviceSchedule);

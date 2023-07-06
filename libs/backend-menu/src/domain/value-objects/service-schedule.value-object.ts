@@ -3,25 +3,21 @@ import { AutoMap } from '@automapper/classes';
 import { ValueObject } from '@resnity/backend-common';
 
 import {
-  assertServiceScheduleName,
-  assertServiceScheduleTimePeriod,
-} from './service-schedule.value-object.assertions';
-import {
   CreateServiceSchedulePayload,
   ServiceScheduleName,
-  ServiceScheduleTimePeriod,
+  assertServiceScheduleNameValid,
 } from './service-schedule.value-object.types';
 import { TimePeriod } from './time-period.value-object';
 
 export class ServiceSchedule extends ValueObject {
   private _name: ServiceScheduleName;
-  private _monday: ServiceScheduleTimePeriod;
-  private _tuesday: ServiceScheduleTimePeriod;
-  private _wednesday: ServiceScheduleTimePeriod;
-  private _thursday: ServiceScheduleTimePeriod;
-  private _friday: ServiceScheduleTimePeriod;
-  private _saturday: ServiceScheduleTimePeriod;
-  private _sunday: ServiceScheduleTimePeriod;
+  private _monday: TimePeriod;
+  private _tuesday: TimePeriod;
+  private _wednesday: TimePeriod;
+  private _thursday: TimePeriod;
+  private _friday: TimePeriod;
+  private _saturday: TimePeriod;
+  private _sunday: TimePeriod;
 
   static create(payload: CreateServiceSchedulePayload) {
     return ServiceSchedule.new(payload);
@@ -41,24 +37,17 @@ export class ServiceSchedule extends ValueObject {
   }
 
   static new(payload: CreateServiceSchedulePayload) {
-    assertServiceScheduleName(payload.name);
-    assertServiceScheduleTimePeriod(payload.monday);
-    assertServiceScheduleTimePeriod(payload.tuesday);
-    assertServiceScheduleTimePeriod(payload.wednesday);
-    assertServiceScheduleTimePeriod(payload.thursday);
-    assertServiceScheduleTimePeriod(payload.friday);
-    assertServiceScheduleTimePeriod(payload.saturday);
-    assertServiceScheduleTimePeriod(payload.sunday);
+    assertServiceScheduleNameValid(payload.name);
 
     const serviceSchedule = new ServiceSchedule();
     serviceSchedule.name = payload.name;
-    serviceSchedule.monday = payload.monday;
-    serviceSchedule.tuesday = payload.tuesday;
-    serviceSchedule.wednesday = payload.wednesday;
-    serviceSchedule.thursday = payload.thursday;
-    serviceSchedule.friday = payload.friday;
-    serviceSchedule.saturday = payload.saturday;
-    serviceSchedule.sunday = payload.sunday;
+    serviceSchedule.monday = TimePeriod.create(payload.monday);
+    serviceSchedule.tuesday = TimePeriod.create(payload.monday);
+    serviceSchedule.wednesday = TimePeriod.create(payload.monday);
+    serviceSchedule.thursday = TimePeriod.create(payload.monday);
+    serviceSchedule.friday = TimePeriod.create(payload.monday);
+    serviceSchedule.saturday = TimePeriod.create(payload.monday);
+    serviceSchedule.sunday = TimePeriod.create(payload.monday);
     return serviceSchedule;
   }
 
@@ -71,58 +60,58 @@ export class ServiceSchedule extends ValueObject {
   }
 
   @AutoMap(() => TimePeriod)
-  get monday(): ServiceScheduleTimePeriod {
+  get monday(): TimePeriod {
     return this._monday;
   }
-  set monday(value: ServiceScheduleTimePeriod) {
+  set monday(value: TimePeriod) {
     this._monday = value;
   }
 
   @AutoMap(() => TimePeriod)
-  get tuesday(): ServiceScheduleTimePeriod {
+  get tuesday(): TimePeriod {
     return this._tuesday;
   }
-  set tuesday(value: ServiceScheduleTimePeriod) {
+  set tuesday(value: TimePeriod) {
     this._tuesday = value;
   }
 
   @AutoMap(() => TimePeriod)
-  get wednesday(): ServiceScheduleTimePeriod {
+  get wednesday(): TimePeriod {
     return this._wednesday;
   }
-  set wednesday(value: ServiceScheduleTimePeriod) {
+  set wednesday(value: TimePeriod) {
     this._wednesday = value;
   }
 
   @AutoMap(() => TimePeriod)
-  get thursday(): ServiceScheduleTimePeriod {
+  get thursday(): TimePeriod {
     return this._thursday;
   }
-  set thursday(value: ServiceScheduleTimePeriod) {
+  set thursday(value: TimePeriod) {
     this._thursday = value;
   }
 
   @AutoMap(() => TimePeriod)
-  get friday(): ServiceScheduleTimePeriod {
+  get friday(): TimePeriod {
     return this._friday;
   }
-  set friday(value: ServiceScheduleTimePeriod) {
+  set friday(value: TimePeriod) {
     this._friday = value;
   }
 
   @AutoMap(() => TimePeriod)
-  get saturday(): ServiceScheduleTimePeriod {
+  get saturday(): TimePeriod {
     return this._saturday;
   }
-  set saturday(value: ServiceScheduleTimePeriod) {
+  set saturday(value: TimePeriod) {
     this._saturday = value;
   }
 
   @AutoMap(() => TimePeriod)
-  get sunday(): ServiceScheduleTimePeriod {
+  get sunday(): TimePeriod {
     return this._sunday;
   }
-  set sunday(value: ServiceScheduleTimePeriod) {
+  set sunday(value: TimePeriod) {
     this._sunday = value;
   }
 }

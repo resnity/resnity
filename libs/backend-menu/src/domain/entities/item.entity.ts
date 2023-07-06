@@ -4,35 +4,25 @@ import {
   BaseEntityPayload,
   Entity,
   createEntityId,
-  extractMapValues,
-  mapClassInstancesToMapBy,
 } from '@resnity/backend-common';
 
 import { Image } from '../value-objects/image.value-object';
-import { ImageUrl } from '../value-objects/image.value-object.types';
 import { Price } from '../value-objects/price.value-object';
-import {
-  assertItemId,
-  assertItemImages,
-  assertItemModifierIds,
-  assertItemName,
-  assertItemPrice,
-} from './item.entity.assertions';
 import {
   CreateItemPayload,
   ItemId,
-  ItemImage,
-  ItemModifierId,
   ItemName,
-  ItemPrice,
   UpdateItemPayload,
+  assertItemIdValid,
+  assertItemNameValid,
 } from './item.entity.types';
+import { ModifierId, assertModifierIdsValid } from './modifier.entity.types';
 
 export class Item extends Entity<ItemId> {
-  private _modifierIds: Set<ItemModifierId>;
+  private _modifierIds: ModifierId[];
   private _name: ItemName;
-  private _price: ItemPrice;
-  private _images: Map<ImageUrl, ItemImage>;
+  private _price: Price;
+  private _images: Image[];
 
   static create(payload: CreateItemPayload) {
     return Item.new({
@@ -44,11 +34,9 @@ export class Item extends Entity<ItemId> {
   }
 
   static new(payload: BaseEntityPayload<CreateItemPayload>) {
-    assertItemId(payload.id);
-    assertItemModifierIds(payload.modifierIds);
-    assertItemName(payload.name);
-    assertItemPrice(payload.price);
-    assertItemImages(payload.images);
+    assertItemIdValid(payload.id);
+    assertModifierIdsValid(payload.modifierIds);
+    assertItemNameValid(payload.name);
 
     const item = new Item();
     item.id = payload.id;
@@ -56,36 +44,34 @@ export class Item extends Entity<ItemId> {
     item.updatedAt = payload.updatedAt;
     item.modifierIds = payload.modifierIds;
     item.name = payload.name;
-    item.price = payload.price;
-    item.images = payload.images;
+    item.price = Price.create(payload.price);
+    item.images = payload.images.map(Image.create);
     return item;
   }
 
   update(payload: UpdateItemPayload) {
     if (payload.modifierIds !== undefined) {
-      assertItemModifierIds(payload.modifierIds);
-      this._modifierIds = new Set(payload.modifierIds);
+      assertModifierIdsValid(payload.modifierIds);
+      this._modifierIds = payload.modifierIds;
     }
     if (payload.name !== undefined) {
-      assertItemName(payload.name);
+      assertItemNameValid(payload.name);
       this._name = payload.name;
     }
     if (payload.price !== undefined) {
-      assertItemPrice(payload.price);
-      this._price = payload.price;
+      this._price = Price.create(payload.price);
     }
     if (payload.images !== undefined) {
-      assertItemImages(payload.images);
-      this._images = mapClassInstancesToMapBy(payload.images, 'url');
+      this._images = payload.images.map(Image.create);
     }
   }
 
   @AutoMap(() => [String])
-  get modifierIds(): ItemModifierId[] {
-    return Array.from(this._modifierIds);
+  get modifierIds(): ModifierId[] {
+    return this._modifierIds;
   }
-  set modifierIds(value: ItemModifierId[]) {
-    this._modifierIds = new Set(value);
+  set modifierIds(value: ModifierId[]) {
+    this._modifierIds = value;
   }
 
   @AutoMap(() => String)
@@ -97,18 +83,18 @@ export class Item extends Entity<ItemId> {
   }
 
   @AutoMap(() => Price)
-  get price(): ItemPrice {
+  get price(): Price {
     return this._price;
   }
-  set price(value: ItemPrice) {
+  set price(value: Price) {
     this._price = value;
   }
 
   @AutoMap(() => [Image])
-  get images(): ItemImage[] {
-    return extractMapValues(this._images);
+  get images(): Image[] {
+    return this._images;
   }
-  set images(value: ItemImage[]) {
-    this._images = mapClassInstancesToMapBy(value, 'url');
+  set images(value: Image[]) {
+    this._images = value;
   }
 }

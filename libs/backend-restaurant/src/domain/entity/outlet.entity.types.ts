@@ -9,6 +9,7 @@ import {
 import { CreateAddressPayload } from '../value-object/address.value-object.types';
 import { CreateContactPayload } from '../value-object/contact.value-object.types';
 import { CreateServiceSchedulePayload } from '../value-object/service-schedule.value-object.types';
+import { CreateTablePayload } from './table.entity.types';
 
 const outletIdSchema = EntityId.brand<'OutletId'>();
 
@@ -28,6 +29,7 @@ export type CreateOutletPayload = {
   menuIds: string[];
   orderIds: string[];
   name: string;
+  tables: CreateTablePayload[];
   address: CreateAddressPayload;
   contact: CreateContactPayload;
   serviceSchedule: CreateServiceSchedulePayload;

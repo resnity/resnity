@@ -1,28 +1,31 @@
 import { z } from 'zod';
 
-import { TimePeriod } from './time-period.value-object';
+import {
+  Validate,
+  domainSchemaValidatorBuilder,
+} from '@resnity/backend-common';
 
-export const ServiceScheduleName = z
+import { CreateTimePeriodPayload } from './time-period.value-object.types';
+
+const serviceScheduleNameSchema = z
   .string()
   .min(2)
   .max(50)
   .brand<'ServiceScheduleName'>();
-export type ServiceScheduleName = z.infer<typeof ServiceScheduleName>;
 
-export const ServiceScheduleTimePeriod = z
-  .instanceof(TimePeriod)
-  .brand<'ServiceScheduleTimePeriod'>();
-export type ServiceScheduleTimePeriod = z.infer<
-  typeof ServiceScheduleTimePeriod
->;
+export const assertServiceScheduleNameValid: Validate<
+  typeof serviceScheduleNameSchema
+> = domainSchemaValidatorBuilder(serviceScheduleNameSchema);
+
+export type ServiceScheduleName = z.infer<typeof serviceScheduleNameSchema>;
 
 export type CreateServiceSchedulePayload = {
   name: string;
-  monday: TimePeriod;
-  tuesday: TimePeriod;
-  wednesday: TimePeriod;
-  thursday: TimePeriod;
-  friday: TimePeriod;
-  saturday: TimePeriod;
-  sunday: TimePeriod;
+  monday: CreateTimePeriodPayload;
+  tuesday: CreateTimePeriodPayload;
+  wednesday: CreateTimePeriodPayload;
+  thursday: CreateTimePeriodPayload;
+  friday: CreateTimePeriodPayload;
+  saturday: CreateTimePeriodPayload;
+  sunday: CreateTimePeriodPayload;
 };
