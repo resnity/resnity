@@ -31,6 +31,7 @@ export type { Repository } from './infrastructure/repository';
 export { RepositoryImpl } from './infrastructure/repository';
 
 export { isNil, isUndefined } from './libs/guards';
+export { withTransformUnknownErrorToAppError } from './libs/promise';
 export {
   extractMapKeys,
   extractMapValues,

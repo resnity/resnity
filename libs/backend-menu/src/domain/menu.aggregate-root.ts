@@ -5,6 +5,7 @@ import {
   BaseEntityPayload,
   DomainError,
   createEntityId,
+  isNil,
   isUndefined,
 } from '@resnity/backend-common';
 
@@ -15,13 +16,22 @@ import {
 import { Category } from './entities/category.entity';
 import {
   CategoryId,
+  CreateCategoryPayload,
+  UpdateCategoryPayload,
   assertCategoryIdValid,
 } from './entities/category.entity.types';
 import { Item } from './entities/item.entity';
-import { ItemId, assertItemIdValid } from './entities/item.entity.types';
+import {
+  CreateItemPayload,
+  ItemId,
+  UpdateItemPayload,
+  assertItemIdValid,
+} from './entities/item.entity.types';
 import { Modifier } from './entities/modifier.entity';
 import {
+  CreateModifierPayload,
   ModifierId,
+  UpdateModifierPayload,
   assertModifierIdValid,
 } from './entities/modifier.entity.types';
 import {
@@ -34,13 +44,8 @@ import {
 } from './menu.aggregate-root.types';
 import {
   CategoryAddedDomainEvent,
-  CategoryRemovedDomainEvent,
-  ItemAddedDomainEvent,
-  ItemRemovedDomainEvent,
   MenuCreatedDomainEvent,
   MenuRemovedDomainEvent,
-  ModifierAddedDomainEvent,
-  ModifierRemovedDomainEvent,
 } from './menu.domain-events';
 import { MenuErrorCode } from './menu.errors';
 
@@ -51,7 +56,7 @@ export class Menu extends AggregateRoot<MenuId> {
   private _items: Item[];
   private _modifiers: Modifier[];
 
-  static async create(payload: CreateMenuPayload) {
+  static create(payload: CreateMenuPayload) {
     const menu = Menu.new({
       id: createEntityId(),
       createdAt: new Date(),
@@ -96,15 +101,10 @@ export class Menu extends AggregateRoot<MenuId> {
     this._addEvent(new MenuRemovedDomainEvent({ aggregateId: this.id }));
   }
 
-  _update(payload: UpdateMenuPayload) {
-    if (!isUndefined(payload.name)) {
-      assertMenuNameValid(payload.name);
-      this._name = payload.name;
-    }
-  }
+  addCategory(payload: CreateCategoryPayload) {
+    const category = this._addCategory(payload);
+    this._setUpdatedAtToNow();
 
-  addCategory(category: Category) {
-    this._addCategory(category);
     this._addEvent(
       new CategoryAddedDomainEvent({
         aggregateId: this.id,
@@ -112,97 +112,90 @@ export class Menu extends AggregateRoot<MenuId> {
         categoryName: category.name,
       }),
     );
+
+    return category.id;
+  }
+
+  updateCategoryById(categoryId: string, payload: UpdateCategoryPayload) {
+    assertCategoryIdValid(categoryId);
+    this._updateCategoryById(categoryId, payload);
     this._setUpdatedAtToNow();
   }
 
-  addItem(item: Item) {
-    this._addItem(item);
-    this._addEvent(
-      new ItemAddedDomainEvent({
-        aggregateId: this.id,
-        itemId: item.id,
-        itemName: item.name,
-      }),
-    );
+  removeCategoryById(categoryId: string) {
+    assertCategoryIdValid(categoryId);
+    this._removeCategoryById(categoryId);
     this._setUpdatedAtToNow();
   }
 
-  addModifier(modifier: Modifier) {
-    this._addModifier(modifier);
-    this._addEvent(
-      new ModifierAddedDomainEvent({
-        aggregateId: this.id,
-        modifierId: modifier.id,
-        modifierName: modifier.name,
-      }),
-    );
+  addItem(payload: CreateItemPayload) {
+    const item = this._addItem(payload);
+    this._setUpdatedAtToNow();
+    return item.id;
+  }
+
+  updateItemById(itemId: string, payload: UpdateItemPayload) {
+    assertItemIdValid(itemId);
+    this._updateItemById(itemId, payload);
     this._setUpdatedAtToNow();
   }
 
-  removeCategoryById(id: string) {
-    assertCategoryIdValid(id);
-
-    this._removeCategoryById(id);
-    this._addEvent(
-      new CategoryRemovedDomainEvent({
-        aggregateId: this.id,
-        categoryId: id,
-      }),
-    );
+  removeItemById(itemId: string) {
+    assertItemIdValid(itemId);
+    this._removeItemById(itemId);
     this._setUpdatedAtToNow();
   }
 
-  removeItemById(id: string) {
-    assertItemIdValid(id);
+  addModifier(payload: CreateModifierPayload) {
+    const modifier = this._addModifier(payload);
+    this._setUpdatedAtToNow();
+    return modifier.id;
+  }
 
-    this._removeItemById(id);
-    this._addEvent(
-      new ItemRemovedDomainEvent({
-        aggregateId: this.id,
-        itemId: id,
-      }),
-    );
+  updateModifierById(modifierId: string, payload: UpdateModifierPayload) {
+    assertModifierIdValid(modifierId);
+    this._updateModifierById(modifierId, payload);
     this._setUpdatedAtToNow();
   }
 
-  removeModifierById(id: string) {
-    assertModifierIdValid(id);
-
-    this._removeModifierById(id);
-    this._addEvent(
-      new ModifierRemovedDomainEvent({
-        aggregateId: this.id,
-        modifierId: id,
-      }),
-    );
+  removeModifierById(modifierId: string) {
+    assertModifierIdValid(modifierId);
+    this._removeModifierById(modifierId);
     this._setUpdatedAtToNow();
   }
 
-  private _addCategory(category: Category) {
+  private _update(payload: UpdateMenuPayload) {
+    if (!isUndefined(payload.name)) {
+      assertMenuNameValid(payload.name);
+      this._name = payload.name;
+    }
+  }
+
+  private _addCategory(payload: CreateCategoryPayload) {
+    const category = Category.create(payload);
+
     if (!this._isCategoryExistsByName(category.name))
       throw DomainError.ofCode(MenuErrorCode.MENU_CATEGORY_NAME_ALREADY_EXISTS);
-    if (!this._areAllCategoryItemsExistByIdInMenu(category.itemIds))
+    if (!this._areCategoryItemsExistInMenu(category.itemIds))
       throw DomainError.ofCode(MenuErrorCode.MENU_ITEM_NOT_FOUND);
 
     this._categories.push(category);
+    return category;
   }
 
-  private _addItem(item: Item) {
-    if (!this._isItemExistsByName(item.name))
-      throw DomainError.ofCode(MenuErrorCode.MENU_ITEM_NAME_ALREADY_EXISTS);
-
-    this._items.push(item);
-  }
-
-  private _addModifier(modifier: Modifier) {
-    if (!this._isModifierExistsByName(modifier.name))
-      throw DomainError.ofCode(MenuErrorCode.MENU_MODIFIER_NAME_ALREADY_EXISTS);
-
-    this._modifiers.push(modifier);
+  private _updateCategoryById(
+    categoryId: CategoryId,
+    payload: UpdateCategoryPayload,
+  ) {
+    const category = this._getCategoryById(categoryId);
+    if (isNil(category))
+      throw DomainError.ofCode(MenuErrorCode.MENU_CATEGORY_NOT_FOUND);
+    category.update(payload);
   }
 
   private _removeCategoryById(categoryId: CategoryId) {
-    if (!this._isCategoryExistsById(categoryId))
+    const category = this._getCategoryById(categoryId);
+    if (isNil(category))
       throw DomainError.ofCode(MenuErrorCode.MENU_CATEGORY_NOT_FOUND);
 
     const indexToRemove = this._categories.findIndex(
@@ -211,8 +204,30 @@ export class Menu extends AggregateRoot<MenuId> {
     this._categories.splice(indexToRemove, 1);
   }
 
+  private _addItem(payload: CreateItemPayload) {
+    const item = Item.create(payload);
+
+    if (!this._isItemExistsByName(item.name))
+      throw DomainError.ofCode(MenuErrorCode.MENU_ITEM_NAME_ALREADY_EXISTS);
+
+    this._items.push(item);
+    return item;
+  }
+
+  private _updateItemById(itemId: ItemId, payload: UpdateItemPayload) {
+    const item = this._getItemById(itemId);
+    if (isNil(item))
+      throw DomainError.ofCode(MenuErrorCode.MENU_ITEM_NOT_FOUND);
+
+    // TODO: Check if modifiers exists in menu
+    // TDDO: Check if category exists in menu
+
+    item.update(payload);
+  }
+
   private _removeItemById(itemId: ItemId) {
-    if (!this._isItemExistsById(itemId))
+    const item = this._getItemById(itemId);
+    if (isNil(item))
       throw DomainError.ofCode(MenuErrorCode.MENU_ITEM_NOT_FOUND);
 
     const indexToRemove = this._items.findIndex((item) => item.id === itemId);
@@ -224,9 +239,36 @@ export class Menu extends AggregateRoot<MenuId> {
       .forEach((modifier) => this._removeModifierById(modifier.id));
   }
 
-  private _removeModifierById(modifierId: ModifierId) {
-    if (!this._isModifierExistsById(modifierId))
+  private _addModifier(payload: CreateModifierPayload) {
+    const modifier = Modifier.create(payload);
+
+    if (!this._isModifierExistsByName(payload.name))
+      throw DomainError.ofCode(MenuErrorCode.MENU_MODIFIER_NAME_ALREADY_EXISTS);
+    // TODO: Extra validation
+
+    this._modifiers.push(modifier);
+    return modifier;
+  }
+
+  private _updateModifierById(
+    modifierId: ModifierId,
+    payload: UpdateModifierPayload,
+  ) {
+    const modifier = this._getModifierById(modifierId);
+
+    if (isNil(modifier))
       throw DomainError.ofCode(MenuErrorCode.MENU_MODIFIER_NOT_FOUND);
+    // TODO: Extra validation
+
+    modifier.update(payload);
+  }
+
+  private _removeModifierById(modifierId: ModifierId) {
+    const modifier = this._getModifierById(modifierId);
+
+    if (isNil(modifier))
+      throw DomainError.ofCode(MenuErrorCode.MENU_MODIFIER_NOT_FOUND);
+    // TODO: Extra validation
 
     const indexToRemove = this._modifiers.findIndex(
       (modifier) => modifier.id === modifierId,
@@ -234,18 +276,24 @@ export class Menu extends AggregateRoot<MenuId> {
     this._modifiers.splice(indexToRemove, 1);
   }
 
-  private _areAllCategoryItemsExistByIdInMenu(itemIds: ItemId[]) {
-    return itemIds.some((itemId) =>
-      this._isCategoryItemExistsByIdInMenu(itemId),
-    );
+  private _areCategoryItemsExistInMenu(itemIds: ItemId[]) {
+    return itemIds.some((itemId) => this._isCategoryItemExistsInMenu(itemId));
   }
 
-  private _isCategoryItemExistsByIdInMenu(itemId: ItemId) {
+  private _isCategoryItemExistsInMenu(itemId: ItemId) {
     return this._isItemExistsById(itemId);
   }
 
-  private _isCategoryExistsById(categoryId: CategoryId) {
-    return this._categories.some((category) => category.id === categoryId);
+  private _getCategoryById(categoryId: CategoryId) {
+    return this._categories.find((category) => category.id === categoryId);
+  }
+
+  private _getItemById(itemId: ItemId) {
+    return this._items.find((item) => item.id === itemId);
+  }
+
+  private _getModifierById(modifierId: ModifierId) {
+    return this._modifiers.find((modifier) => modifier.id === modifierId);
   }
 
   private _isItemExistsById(itemId: ItemId) {

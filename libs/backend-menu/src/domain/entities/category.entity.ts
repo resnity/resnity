@@ -53,6 +53,17 @@ export class Category extends Entity<CategoryId> {
   }
 
   async update(payload: UpdateCategoryPayload) {
+    this._update(payload);
+    this._setUpdatedAtToNow();
+  }
+
+  removeItemById(id: string) {
+    assertItemIdValid(id);
+    this._removeItemById(id);
+    this._setUpdatedAtToNow();
+  }
+
+  private _update(payload: UpdateCategoryPayload) {
     if (payload.name !== undefined) {
       assertCategoryNameValid(payload.name);
       this._name = payload.name;
@@ -64,13 +75,6 @@ export class Category extends Entity<CategoryId> {
     if (payload.serviceSchedule !== undefined) {
       this._serviceSchedule = ServiceSchedule.create(payload.serviceSchedule);
     }
-    this._setUpdatedAtToNow();
-  }
-
-  removeItemById(id: string) {
-    assertItemIdValid(id);
-    this._removeItemById(id);
-    this._setUpdatedAtToNow();
   }
 
   private _removeItemById(itemId: ItemId) {

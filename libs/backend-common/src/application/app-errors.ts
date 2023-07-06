@@ -20,6 +20,7 @@ const CommonAppErrorCode = {
   NOT_FOUND: '0001',
   UNAUTHORIZED: '0002',
   FORBIDDEN: '0003',
+  INTERNAL_SERVER_ERROR: '0004',
 } as const;
 
 export class AppError extends Error {
@@ -46,6 +47,16 @@ export class AppError extends Error {
       status,
       context: error.context,
       additionalErrors: error.additionalErrors,
+    });
+  }
+
+  static fromUnknown(error: unknown) {
+    if (error instanceof AppError) return error;
+    if (error instanceof DomainError) return AppError.fromDomain(error);
+    return new AppError({
+      code: CommonAppErrorCode.INTERNAL_SERVER_ERROR,
+      message: 'Internal server error',
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
     });
   }
 }
