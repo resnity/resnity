@@ -1,30 +1,39 @@
+import { User } from '@auth0/auth0-spa-js';
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
-import { ForbiddenError } from '@resnity/backend-common';
+import {
+  APP_CLS_USER,
+  AppClsService,
+  ForbiddenError,
+  UnauthorizedError,
+  isNil,
+} from '@resnity/backend-common';
 
 import {
   REQUIRED_PERMISSIONS_KEY,
   REQUIRED_PERMISSIONS_STRATEGY_KEY,
 } from '../auth.constants';
 import { Permission, RequiredPermissionsStrategy } from '../auth.types';
-import { extractUserFromRequest } from '../libs/request';
 
 @Injectable()
 export class RequiredPermissionsGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+  constructor(
+    private readonly _reflector: Reflector,
+    private readonly _appClsService: AppClsService<User>,
+  ) {}
 
   async canActivate(context: ExecutionContext) {
-    const request = context.switchToHttp().getRequest();
+    const user = this._appClsService.get(APP_CLS_USER);
+    if (isNil(user)) throw new UnauthorizedError();
 
-    const user = await extractUserFromRequest(request);
     const userPermissions = user.permissions;
-    const requiredPermissions = this.reflector.get<Permission[]>(
+    const requiredPermissions = this._reflector.get<Permission[]>(
       REQUIRED_PERMISSIONS_KEY,
       context.getHandler(),
     );
     const requiredPermissionsStrategy =
-      this.reflector.get<RequiredPermissionsStrategy>(
+      this._reflector.get<RequiredPermissionsStrategy>(
         REQUIRED_PERMISSIONS_STRATEGY_KEY,
         context.getHandler(),
       );
@@ -35,9 +44,8 @@ export class RequiredPermissionsGuard implements CanActivate {
         requiredPermissions,
         requiredPermissionsStrategy,
       )
-    ) {
+    )
       throw new ForbiddenError();
-    }
 
     return true;
   }

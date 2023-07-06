@@ -7,7 +7,8 @@ import {
 } from '@resnity/backend-common';
 
 import { AUTH0_CLIENT_TOKEN, AUTH_SERVICE_TOKEN } from './auth.constants';
-import { Auth0Client, Auth0ClientImpl } from './clients/auth0.client';
+import { Auth0ClientImpl } from './clients/auth0.client';
+import { OAuth2Client } from './clients/oauth2.client.types';
 import { AccessTokenGuard } from './guards/access-token.guard';
 import { JwtModule } from './jwt/jwt.module';
 import { AuthServiceImpl } from './services/auth.service';
@@ -20,7 +21,7 @@ const auth0ClientProvider: Provider = {
 
 const authService: Provider = {
   provide: AUTH_SERVICE_TOKEN,
-  useFactory: (auth0Client: Auth0Client) => new AuthServiceImpl(auth0Client),
+  useFactory: (oAuth2Client: OAuth2Client) => new AuthServiceImpl(oAuth2Client),
   inject: [AUTH0_CLIENT_TOKEN],
 };
 

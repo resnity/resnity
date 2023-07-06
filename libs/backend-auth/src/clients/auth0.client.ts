@@ -1,28 +1,29 @@
-import { Environment, UnauthorizedError } from '@resnity/backend-common';
+import {
+  Environment,
+  UnauthorizedError,
+  Validate,
+  schemaValidatorBuilder,
+} from '@resnity/backend-common';
 
 import axios from '../libs/axios';
-import { Auth0User } from './auth0.models';
+import { OAuth2Client, UserInfo, userInfoSchema } from './oauth2.client.types';
 
-export interface Auth0Client {
-  getUserInfo(accessToken: string): Promise<Auth0User>;
-}
-
-export class Auth0ClientImpl implements Auth0Client {
+export class Auth0ClientImpl implements OAuth2Client {
   constructor(private readonly environment: Environment) {}
 
-  async getUserInfo(accessToken: string): Promise<Auth0User> {
+  async getUserInfo(accessToken: string): Promise<UserInfo> {
     const url = `https://${this.environment.AUTH0_DOMAIN}/userinfo`;
     const response = await axios.get(url, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
+      headers: { Authorization: `Bearer ${accessToken}` },
     });
 
-    const result = await Auth0User.safeParseAsync(response.data);
-    if (!result.success) {
-      throw new UnauthorizedError();
-    }
+    const userInfo = response.data;
+    const validateUserInfo: Validate<typeof userInfoSchema> =
+      schemaValidatorBuilder(userInfo, () => {
+        throw new UnauthorizedError();
+      });
+    validateUserInfo(userInfo);
 
-    return result.data;
+    return userInfo;
   }
 }
