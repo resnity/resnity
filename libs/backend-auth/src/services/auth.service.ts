@@ -1,23 +1,30 @@
-import { UnauthorizedError } from '@resnity/backend-common';
+import {
+  UnauthorizedError,
+  Validate,
+  schemaValidatorBuilder,
+} from '@resnity/backend-common';
 
-import { Auth0Client } from '../clients/auth0.client';
-import { User } from './auth.types';
+import { OAuth2Client } from '../clients/oauth2.client.types';
+import { User, userSchema } from './auth.service.types';
 
 export interface AuthService {
   getUserInfo(accessToken: string): Promise<User>;
 }
 
 export class AuthServiceImpl implements AuthService {
-  constructor(private readonly auth0Client: Auth0Client) {}
+  constructor(private readonly oAuth2Client: OAuth2Client) {}
 
   async getUserInfo(accessToken: string): Promise<User> {
-    const auth0User = await this.auth0Client.getUserInfo(accessToken);
+    const user = await this.oAuth2Client.getUserInfo(accessToken);
 
-    const result = await User.safeParseAsync(auth0User);
-    if (!result.success) {
-      throw new UnauthorizedError();
-    }
+    const validateUser: Validate<typeof userSchema> = schemaValidatorBuilder(
+      userSchema,
+      () => {
+        throw new UnauthorizedError();
+      },
+    );
+    validateUser(user);
 
-    return result.data;
+    return user;
   }
 }

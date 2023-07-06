@@ -16,7 +16,7 @@ import {
 import { AUTH_SERVICE_TOKEN, JWT_SERVICE_TOKEN } from '../auth.constants';
 import { JwtService } from '../jwt/jwt.service';
 import { AuthService } from '../services/auth.service';
-import { User } from '../services/auth.types';
+import { User } from '../services/auth.service.types';
 
 @Injectable()
 export class AccessTokenGuard implements CanActivate {
@@ -41,8 +41,6 @@ export class AccessTokenGuard implements CanActivate {
 
       this._appClsService.set(APP_CLS_TENANT_ID, orgId);
       this._appClsService.set(APP_CLS_USER, user);
-
-      request.user = user;
     } catch (err) {
       throw new UnauthorizedError();
     }

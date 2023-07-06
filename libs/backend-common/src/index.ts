@@ -39,6 +39,7 @@ export {
 } from './libs/transforms';
 export {
   domainSchemaValidatorBuilder,
+  schemaValidatorBuilder,
   validateOrThrowDomainError,
 } from './libs/validator';
 export type { Validate } from './libs/validator';
