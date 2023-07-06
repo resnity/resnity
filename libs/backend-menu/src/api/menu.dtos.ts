@@ -3,9 +3,17 @@ import { AutoMap } from '@automapper/classes';
 import { EmbeddedResponseDto, ResponseDto } from '@resnity/backend-common';
 
 import {
-  AddCategoryServicePayload,
+  CreateCategoryServicePayload,
+  CreateImageServicePayload,
+  CreateItemServicePayload,
   CreateMenuServicePayload,
+  CreateModifierServicePayload,
+  CreatePriceServicePayload,
+  CreateServiceScheduleServicePayload,
+  CreateTimePeriodServicePayload,
+  UpdateItemServicePayload,
   UpdateMenuServicePayload,
+  UpdateModifierServicePayload,
 } from '../application/menu.services.types';
 import { RawPriceCurrency } from '../domain/value-objects/price.value-object.types';
 
@@ -104,25 +112,74 @@ export class UpdateMenuRequestBody implements UpdateMenuServicePayload {
   readonly name?: string;
 }
 
-export class AddCategoryRequestBody
-  implements Omit<AddCategoryServicePayload, 'menuId'>
+export class CreateTimePeriodRequestBody
+  implements CreateTimePeriodServicePayload
+{
+  readonly startTime: string;
+  readonly endTime: string;
+}
+
+export class CreateServiceScheduleRequestBody
+  implements CreateServiceScheduleServicePayload
 {
   readonly name: string;
+  readonly monday: CreateTimePeriodRequestBody;
+  readonly tuesday: CreateTimePeriodRequestBody;
+  readonly wednesday: CreateTimePeriodRequestBody;
+  readonly thursday: CreateTimePeriodRequestBody;
+  readonly friday: CreateTimePeriodRequestBody;
+  readonly saturday: CreateTimePeriodRequestBody;
+  readonly sunday: CreateTimePeriodRequestBody;
+}
+
+export class CreateCategoryRequestBody implements CreateCategoryServicePayload {
   readonly itemIds: string[];
+  readonly name: string;
+  readonly serviceSchedule: CreateServiceScheduleRequestBody;
 }
 
-class UpdateTimePeriodBody {
-  readonly startTime?: string;
-  readonly endTime?: string;
-}
-
-export class UpdateServiceScheduleBody {
+export class UpdateCategoryRequestBody implements UpdateCategoryRequestBody {
+  readonly itemIds?: string[];
   readonly name?: string;
-  readonly monday?: UpdateTimePeriodBody;
-  readonly tuesday?: UpdateTimePeriodBody;
-  readonly wednesday?: UpdateTimePeriodBody;
-  readonly thursday?: UpdateTimePeriodBody;
-  readonly friday?: UpdateTimePeriodBody;
-  readonly saturday?: UpdateTimePeriodBody;
-  readonly sunday?: UpdateTimePeriodBody;
+  readonly serviceSchedule?: CreateServiceScheduleRequestBody;
+}
+
+export class CreatePriceRequestBody implements CreatePriceServicePayload {
+  readonly amount: number;
+  readonly currency: RawPriceCurrency;
+}
+
+export class CreateImageRequestBody implements CreateImageServicePayload {
+  readonly url: string;
+}
+
+export class CreateItemRequestBody implements CreateItemServicePayload {
+  readonly modifierIds: string[];
+  readonly name: string;
+  readonly price: CreatePriceRequestBody;
+  readonly images: CreateImageRequestBody[];
+}
+
+export class UpdateItemRequestBody implements UpdateItemServicePayload {
+  readonly modifierIds?: string[];
+  readonly name?: string;
+  readonly price?: CreatePriceRequestBody;
+  readonly images?: CreateImageRequestBody[];
+}
+
+export class CreateModifierRequestBody implements CreateModifierServicePayload {
+  readonly itemId: string;
+  readonly name: string;
+  readonly minSelection: number;
+  readonly maxSelection: number;
+  readonly isRepeatable: boolean;
+  readonly price: CreatePriceRequestBody;
+}
+
+export class UpdateModifierRequestBody implements UpdateModifierServicePayload {
+  readonly name?: string;
+  readonly minSelection?: number;
+  readonly maxSelection?: number;
+  readonly isRepeatable?: boolean;
+  readonly price?: CreatePriceRequestBody;
 }

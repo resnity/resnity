@@ -1,6 +1,12 @@
 import { z } from 'zod';
 
-import { priceCurrencies } from '../domain/value-objects/price.value-object.types';
+import { CreateImagePayload } from '../domain/value-objects/image.value-object.types';
+import {
+  CreatePricePayload,
+  priceCurrencies,
+} from '../domain/value-objects/price.value-object.types';
+import { CreateServiceSchedulePayload } from '../domain/value-objects/service-schedule.value-object.types';
+import { CreateTimePeriodPayload } from '../domain/value-objects/time-period.value-object.types';
 
 export type CreateMenuServicePayload = {
   restaurantId: string;
@@ -11,35 +17,53 @@ export type UpdateMenuServicePayload = {
   name?: string;
 };
 
-export const AddCategoryServicePayload = z.object({
-  name: z.string(),
-  itemIds: z.array(z.string()),
-  menuId: z.string(),
-});
-export type AddCategoryServicePayload = z.infer<
-  typeof AddCategoryServicePayload
->;
+export type CreateTimePeriodServicePayload = CreateTimePeriodPayload;
 
-export const AddItemServicePayload = z.object({
-  name: z.string(),
-  priceAmount: z.number(),
-  priceCurrency: z.enum(priceCurrencies),
-  imageUrls: z.array(z.string()),
-  modifierIds: z.string().array(),
-  menuId: z.string(),
-});
-export type AddItemServicePayload = z.infer<typeof AddItemServicePayload>;
+export type CreateServiceScheduleServicePayload = CreateServiceSchedulePayload;
 
-export const AddModifierServicePayload = z.object({
-  name: z.string(),
-  priceAmount: z.number(),
-  priceCurrency: z.enum(priceCurrencies),
-  minSelection: z.number(),
-  maxSelection: z.number(),
-  isRepeatable: z.boolean(),
-  menuId: z.string(),
-  itemId: z.string(),
-});
-export type AddModifierServicePayload = z.infer<
-  typeof AddModifierServicePayload
->;
+export type CreatePriceServicePayload = CreatePricePayload;
+
+export type CreateImageServicePayload = CreateImagePayload;
+
+export type CreateCategoryServicePayload = {
+  itemIds: string[];
+  name: string;
+  serviceSchedule: CreateServiceScheduleServicePayload;
+};
+
+export type UpdateCategoryServicePayload = {
+  itemIds?: string[];
+  name?: string;
+  serviceSchedule?: CreateServiceScheduleServicePayload;
+};
+
+export type CreateItemServicePayload = {
+  modifierIds: string[];
+  name: string;
+  price: CreatePriceServicePayload;
+  images: CreateImageServicePayload[];
+};
+
+export type UpdateItemServicePayload = {
+  modifierIds?: string[];
+  name?: string;
+  price?: CreatePriceServicePayload;
+  images?: CreateImageServicePayload[];
+};
+
+export type CreateModifierServicePayload = {
+  itemId: string;
+  name: string;
+  minSelection: number;
+  maxSelection: number;
+  isRepeatable: boolean;
+  price: CreatePriceServicePayload;
+};
+
+export type UpdateModifierServicePayload = {
+  name?: string;
+  minSelection?: number;
+  maxSelection?: number;
+  isRepeatable?: boolean;
+  price?: CreatePriceServicePayload;
+};

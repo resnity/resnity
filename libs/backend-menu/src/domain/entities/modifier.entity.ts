@@ -15,6 +15,7 @@ import {
   ModifierMaxSelection,
   ModifierMinSelection,
   ModifierName,
+  UpdateModifierPayload,
   assertModifierIdValid,
   assertModifierIsRepeatableValid,
   assertModifierMaxSelectionValid,
@@ -58,6 +59,33 @@ export class Modifier extends Entity<ModifierId> {
     modifier.isRepeatable = payload.isRepeatable;
     modifier.price = Price.create(payload.price);
     return modifier;
+  }
+
+  update(payload: UpdateModifierPayload) {
+    this._update(payload);
+    this._setUpdatedAtToNow();
+  }
+
+  private _update(payload: UpdateModifierPayload) {
+    if (payload.name) {
+      assertModifierNameValid(payload.name);
+      this.name = payload.name;
+    }
+    if (payload.minSelection) {
+      assertModifierMinSelectionValid(payload.minSelection);
+      this.minSelection = payload.minSelection;
+    }
+    if (payload.maxSelection) {
+      assertModifierMaxSelectionValid(payload.maxSelection);
+      this.maxSelection = payload.maxSelection;
+    }
+    if (payload.isRepeatable) {
+      assertModifierIsRepeatableValid(payload.isRepeatable);
+      this.isRepeatable = payload.isRepeatable;
+    }
+    if (payload.price) {
+      this.price = Price.create(payload.price);
+    }
   }
 
   @AutoMap(() => String)

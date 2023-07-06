@@ -65,3 +65,11 @@ export type CreateModifierPayload = {
   isRepeatable: boolean;
   price: CreatePricePayload;
 };
+
+export type UpdateModifierPayload = {
+  name?: string;
+  minSelection?: number;
+  maxSelection?: number;
+  isRepeatable?: boolean;
+  price?: CreatePricePayload;
+};
