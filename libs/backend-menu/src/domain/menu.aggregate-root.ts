@@ -5,6 +5,7 @@ import {
   BaseEntityPayload,
   DomainError,
   createEntityId,
+  isUndefined,
 } from '@resnity/backend-common';
 
 import {
@@ -27,6 +28,7 @@ import {
   CreateMenuPayload,
   MenuId,
   MenuName,
+  UpdateMenuPayload,
   assertMenuIdValid,
   assertMenuNameValid,
 } from './menu.aggregate-root.types';
@@ -36,6 +38,7 @@ import {
   ItemAddedDomainEvent,
   ItemRemovedDomainEvent,
   MenuCreatedDomainEvent,
+  MenuRemovedDomainEvent,
   ModifierAddedDomainEvent,
   ModifierRemovedDomainEvent,
 } from './menu.domain-events';
@@ -82,6 +85,22 @@ export class Menu extends AggregateRoot<MenuId> {
     menu.items = payload.items.map(Item.create);
     menu.modifiers = payload.modifiers.map(Modifier.create);
     return menu;
+  }
+
+  update(payload: UpdateMenuPayload) {
+    this._update(payload);
+    this._setUpdatedAtToNow();
+  }
+
+  remove() {
+    this._addEvent(new MenuRemovedDomainEvent({ aggregateId: this.id }));
+  }
+
+  _update(payload: UpdateMenuPayload) {
+    if (!isUndefined(payload.name)) {
+      assertMenuNameValid(payload.name);
+      this._name = payload.name;
+    }
   }
 
   addCategory(category: Category) {
