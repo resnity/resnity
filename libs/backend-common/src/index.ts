@@ -30,7 +30,7 @@ export {
 export type { Repository } from './infrastructure/repository';
 export { RepositoryImpl } from './infrastructure/repository';
 
-export { isNil } from './libs/guards';
+export { isNil, isUndefined } from './libs/guards';
 export {
   extractMapKeys,
   extractMapValues,

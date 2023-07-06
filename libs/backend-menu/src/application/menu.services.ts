@@ -25,6 +25,7 @@ import {
   AddItemServicePayload,
   AddModifierServicePayload,
   CreateMenuServicePayload,
+  UpdateMenuServicePayload,
 } from './menu.services.types';
 
 export const MENU_SERVICES_TOKEN = Symbol('MENU_SERVICES_TOKEN');
@@ -32,6 +33,12 @@ export const MENU_SERVICES_TOKEN = Symbol('MENU_SERVICES_TOKEN');
 export interface MenuServices {
   getMenus(): Promise<Menu[]>;
   createMenu(payload: CreateMenuServicePayload): Promise<string>;
+  updateMenuById(
+    menuId: string,
+    payload: UpdateMenuServicePayload,
+  ): Promise<void>;
+  removeMenuById(menuId: string): Promise<void>;
+
   addCategory(payload: AddCategoryServicePayload): Promise<string>;
   addItem(payload: AddItemServicePayload): Promise<string>;
   addModifier(payload: AddModifierServicePayload): Promise<string>;
@@ -63,6 +70,26 @@ export class MenuServicesImpl implements MenuServices {
     });
 
     return menu.id;
+  }
+
+  async updateMenuById(menuId: string, payload: UpdateMenuServicePayload) {
+    const menu = await this._getMenuById(menuId);
+    menu.update(payload);
+
+    await this._repository.withTransaction(async () => {
+      await menu.publishEvents(this._eventEmitter);
+      await this._repository.update(menu);
+    });
+  }
+
+  async removeMenuById(menuId: string) {
+    const menu = await this._getMenuById(menuId);
+    menu.remove();
+
+    await this._repository.withTransaction(async () => {
+      await menu.publishEvents(this._eventEmitter);
+      await this._repository.remove(menu);
+    });
   }
 
   async addCategory(payload: AddCategoryServicePayload) {

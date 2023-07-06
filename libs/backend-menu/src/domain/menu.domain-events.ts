@@ -1,5 +1,31 @@
 import { CreateEventPayload, DomainEvent } from '@resnity/backend-common';
 
+export class MenuCreatedDomainEvent extends DomainEvent {
+  readonly name: string;
+  readonly restaurantId: string;
+
+  constructor(payload: CreateEventPayload<MenuCreatedDomainEvent>) {
+    super(payload);
+    this.name = payload.name;
+    this.restaurantId = payload.restaurantId;
+  }
+}
+
+export class MenuUpdatedDomainEvent extends DomainEvent {
+  readonly menuName: string;
+
+  constructor(payload: CreateEventPayload<MenuUpdatedDomainEvent>) {
+    super(payload);
+    this.menuName = payload.menuName;
+  }
+}
+
+export class MenuRemovedDomainEvent extends DomainEvent {
+  constructor(payload: CreateEventPayload<MenuRemovedDomainEvent>) {
+    super(payload);
+  }
+}
+
 export class CategoryAddedDomainEvent extends DomainEvent {
   readonly categoryId: string;
   readonly categoryName: string;
@@ -37,26 +63,6 @@ export class ItemRemovedDomainEvent extends DomainEvent {
   constructor(payload: CreateEventPayload<ItemRemovedDomainEvent>) {
     super(payload);
     this.itemId = payload.itemId;
-  }
-}
-
-export class MenuCreatedDomainEvent extends DomainEvent {
-  readonly name: string;
-  readonly restaurantId: string;
-
-  constructor(payload: CreateEventPayload<MenuCreatedDomainEvent>) {
-    super(payload);
-    this.name = payload.name;
-    this.restaurantId = payload.restaurantId;
-  }
-}
-
-export class MenuUpdatedDomainEvent extends DomainEvent {
-  readonly menuName: string;
-
-  constructor(payload: CreateEventPayload<MenuUpdatedDomainEvent>) {
-    super(payload);
-    this.menuName = payload.menuName;
   }
 }
 

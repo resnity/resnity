@@ -33,9 +33,5 @@ export type CreateMenuPayload = {
 };
 
 export type UpdateMenuPayload = {
-  restaurantId?: string;
   name?: string;
-  categories?: CreateCategoryPayload[];
-  items?: CreateItemPayload[];
-  modifiers?: CreateModifierPayload[];
 };

@@ -5,6 +5,7 @@ import { EmbeddedResponseDto, ResponseDto } from '@resnity/backend-common';
 import {
   AddCategoryServicePayload,
   CreateMenuServicePayload,
+  UpdateMenuServicePayload,
 } from '../application/menu.services.types';
 import { RawPriceCurrency } from '../domain/value-objects/price.value-object.types';
 
@@ -97,6 +98,10 @@ export class MenuResponseDto extends ResponseDto {
 export class CreateMenuRequestBody implements CreateMenuServicePayload {
   readonly name: string;
   readonly restaurantId: string;
+}
+
+export class UpdateMenuRequestBody implements UpdateMenuServicePayload {
+  readonly name?: string;
 }
 
 export class AddCategoryRequestBody

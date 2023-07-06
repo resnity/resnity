@@ -1,12 +1,15 @@
-import { string, z } from 'zod';
+import { z } from 'zod';
 
 import { priceCurrencies } from '../domain/value-objects/price.value-object.types';
 
-export const CreateMenuServicePayload = z.object({
-  name: z.string(),
-  restaurantId: string(),
-});
-export type CreateMenuServicePayload = z.infer<typeof CreateMenuServicePayload>;
+export type CreateMenuServicePayload = {
+  restaurantId: string;
+  name: string;
+};
+
+export type UpdateMenuServicePayload = {
+  name?: string;
+};
 
 export const AddCategoryServicePayload = z.object({
   name: z.string(),
