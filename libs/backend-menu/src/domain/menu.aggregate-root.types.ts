@@ -1,43 +1,41 @@
 import { z } from 'zod';
 
-import { BaseEntityPayload, EntityId } from '@resnity/backend-common';
+import {
+  EntityId,
+  Validate,
+  domainSchemaValidatorBuilder,
+} from '@resnity/backend-common';
 
-import { Category } from './entities/category.entity';
-import { Item } from './entities/item.entity';
-import { Modifier } from './entities/modifier.entity';
+import { CreateCategoryPayload } from './entities/category.entity.types';
+import { CreateItemPayload } from './entities/item.entity.types';
+import { CreateModifierPayload } from './entities/modifier.entity.types';
 
-export const MenuId = EntityId.brand<'MenuId'>();
-export type MenuId = z.infer<typeof MenuId>;
+const menuIdSchema = EntityId.brand<'MenuId'>();
 
-export const MenuRestaurantId = EntityId.brand<'MenuRestaurantId'>();
-export type MenuRestaurantId = z.infer<typeof MenuRestaurantId>;
+const menuNameSchema = z.string().brand<'MenuName'>();
 
-export const MenuName = z.string().brand<'MenuName'>();
-export type MenuName = z.infer<typeof MenuName>;
+export const assertMenuIdValid: Validate<typeof menuIdSchema> =
+  domainSchemaValidatorBuilder(menuIdSchema);
 
-export const MenuCategory = z.instanceof(Category).brand<'MenuCategory'>();
-export type MenuCategory = z.infer<typeof MenuCategory>;
+export const assertMenuNameValid: Validate<typeof menuNameSchema> =
+  domainSchemaValidatorBuilder(menuNameSchema);
 
-export const MenuItem = z.instanceof(Item).brand<'MenuItem'>();
-export type MenuItem = z.infer<typeof MenuItem>;
+export type MenuId = z.infer<typeof menuIdSchema>;
 
-export const MenuModifier = z.instanceof(Modifier).brand<'MenuModifier'>();
-export type MenuModifier = z.infer<typeof MenuModifier>;
+export type MenuName = z.infer<typeof menuNameSchema>;
 
 export type CreateMenuPayload = {
   restaurantId: string;
   name: string;
-  categories: Category[];
-  items: Item[];
-  modifiers: Modifier[];
+  categories: CreateCategoryPayload[];
+  items: CreateItemPayload[];
+  modifiers: CreateModifierPayload[];
 };
 
-export type NewMenuPayload = BaseEntityPayload<CreateMenuPayload>;
-
-export const UpdateMenuPayload = z.object({
-  name: MenuName.optional(),
-  categories: z.instanceof(Category).array().optional(),
-  items: z.instanceof(Item).array().optional(),
-  modifiers: z.instanceof(Modifier).array().optional(),
-});
-export type UpdateMenuPayload = z.infer<typeof UpdateMenuPayload>;
+export type UpdateMenuPayload = {
+  restaurantId?: string;
+  name?: string;
+  categories?: CreateCategoryPayload[];
+  items?: CreateItemPayload[];
+  modifiers?: CreateModifierPayload[];
+};

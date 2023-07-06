@@ -3,13 +3,11 @@ import { AutoMap } from '@automapper/classes';
 import { ValueObject } from '@resnity/backend-common';
 
 import {
-  assertPriceAmount,
-  assertPriceCurrency,
-} from './price.value-object.assertions';
-import {
   CreatePricePayload,
   PriceAmount,
   PriceCurrency,
+  assertPriceAmountValid,
+  assertPriceCurrencyValid,
 } from './price.value-object.types';
 
 export class Price extends ValueObject {
@@ -21,8 +19,8 @@ export class Price extends ValueObject {
   }
 
   static new(payload: CreatePricePayload) {
-    assertPriceAmount(payload.amount);
-    assertPriceCurrency(payload.currency);
+    assertPriceAmountValid(payload.amount);
+    assertPriceCurrencyValid(payload.currency);
 
     const price = new Price();
     price.amount = payload.amount;

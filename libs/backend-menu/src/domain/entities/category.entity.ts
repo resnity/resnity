@@ -10,26 +10,23 @@ import {
 import { MenuErrorCode } from '../menu.errors';
 import { ServiceSchedule } from '../value-objects/service-schedule.value-object';
 import {
-  assertCategoryId,
-  assertCategoryItemIds,
-  assertCategoryName,
-  assertCategoryServiceSchedule,
-} from './category.entity.assertions';
-import {
   CategoryId,
-  CategoryItemId,
   CategoryName,
-  CategoryServiceSchedule,
   CreateCategoryPayload,
   UpdateCategoryPayload,
+  assertCategoryIdValid,
+  assertCategoryNameValid,
 } from './category.entity.types';
-import { assertItemId } from './item.entity.assertions';
-import { ItemId } from './item.entity.types';
+import {
+  ItemId,
+  assertItemIdValid,
+  assertItemIdsValid,
+} from './item.entity.types';
 
 export class Category extends Entity<CategoryId> {
   private _name: CategoryName;
-  private _itemIds: Set<CategoryItemId>;
-  private _serviceSchedule: CategoryServiceSchedule;
+  private _itemIds: ItemId[];
+  private _serviceSchedule: ServiceSchedule;
 
   static create(payload: CreateCategoryPayload) {
     return Category.new({
@@ -41,10 +38,9 @@ export class Category extends Entity<CategoryId> {
   }
 
   static new(payload: BaseEntityPayload<CreateCategoryPayload>) {
-    assertCategoryId(payload.id);
-    assertCategoryName(payload.name);
-    assertCategoryItemIds(payload.itemIds);
-    assertCategoryServiceSchedule(payload.serviceSchedule);
+    assertCategoryIdValid(payload.id);
+    assertCategoryNameValid(payload.name);
+    assertItemIdsValid(payload.itemIds);
 
     const category = new Category();
     category.createdAt = payload.createdAt;
@@ -52,36 +48,36 @@ export class Category extends Entity<CategoryId> {
     category.id = payload.id;
     category.name = payload.name;
     category.itemIds = payload.itemIds;
-    category.serviceSchedule = payload.serviceSchedule;
+    category.serviceSchedule = ServiceSchedule.create(payload.serviceSchedule);
     return category;
   }
 
   async update(payload: UpdateCategoryPayload) {
     if (payload.name !== undefined) {
-      assertCategoryName(payload.name);
+      assertCategoryNameValid(payload.name);
       this._name = payload.name;
     }
     if (payload.itemIds !== undefined) {
-      assertCategoryItemIds(payload.itemIds);
-      this._itemIds = new Set(payload.itemIds);
+      assertItemIdsValid(payload.itemIds);
+      this._itemIds = payload.itemIds;
     }
     if (payload.serviceSchedule !== undefined) {
-      assertCategoryServiceSchedule(payload.serviceSchedule);
-      this._serviceSchedule = payload.serviceSchedule;
+      this._serviceSchedule = ServiceSchedule.create(payload.serviceSchedule);
     }
     this._setUpdatedAtToNow();
   }
 
   removeItemById(id: string) {
-    assertItemId(id);
+    assertItemIdValid(id);
     this._removeItemById(id);
     this._setUpdatedAtToNow();
   }
 
   private _removeItemById(itemId: ItemId) {
-    if (!this._itemIds.has(itemId))
+    if (!this._itemIds.includes(itemId))
       throw DomainError.ofCode(MenuErrorCode.MENU_CATEGORY_ITEM_NOT_FOUND);
-    this._itemIds.delete(itemId);
+    const indexToRemove = this._itemIds.findIndex((id) => id === itemId);
+    this._itemIds.splice(indexToRemove, 1);
   }
 
   @AutoMap()
@@ -93,18 +89,18 @@ export class Category extends Entity<CategoryId> {
   }
 
   @AutoMap()
+  get itemIds(): ItemId[] {
+    return this._itemIds;
+  }
+  set itemIds(value: ItemId[]) {
+    this._itemIds = value;
+  }
+
+  @AutoMap()
   get serviceSchedule(): ServiceSchedule {
     return this._serviceSchedule;
   }
   set serviceSchedule(value: ServiceSchedule) {
     this._serviceSchedule = value;
-  }
-
-  @AutoMap()
-  get itemIds(): CategoryItemId[] {
-    return Array.from(this._itemIds);
-  }
-  set itemIds(value: CategoryItemId[]) {
-    this._itemIds = new Set(value);
   }
 }
