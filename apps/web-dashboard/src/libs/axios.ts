@@ -13,6 +13,16 @@ const withAuthHeader = async <R>(
   return cb(headers);
 };
 
+const withSelectData = async <
+  T = unknown,
+  R extends AxiosResponse<T> = AxiosResponse<T>,
+>(
+  cb: () => Promise<R>,
+): Promise<AxiosResponse['data']> => {
+  const response = await cb();
+  return response.data;
+};
+
 const mergeHeadersAndConfig = <D = unknown>(
   headers: AxiosRequestConfig<D>['headers'],
   config?: AxiosRequestConfig<D>,
@@ -22,26 +32,38 @@ const mergeHeadersAndConfig = <D = unknown>(
 });
 
 export const axiosWithAuth = {
-  get: <T = unknown, R = AxiosResponse<T>, D = unknown>(
+  get: <
+    T = unknown,
+    R extends AxiosResponse<T> = AxiosResponse<T>,
+    D = unknown,
+  >(
     url: string,
     config?: AxiosRequestConfig<D>,
   ) =>
     withAuthHeader((headers) =>
-      instanceWithAuth.get<T, R, D>(
-        url,
-        mergeHeadersAndConfig(headers, config),
+      withSelectData<T, R>(() =>
+        instanceWithAuth.get<T, R, D>(
+          url,
+          mergeHeadersAndConfig(headers, config),
+        ),
       ),
     ),
-  post: <T = unknown, R = AxiosResponse<T>, D = unknown>(
+  post: <
+    T = unknown,
+    R extends AxiosResponse<T> = AxiosResponse<T>,
+    D = unknown,
+  >(
     url: string,
     data: D,
     config?: AxiosRequestConfig<D>,
   ) =>
     withAuthHeader((headers) =>
-      instanceWithAuth.post<T, R, D>(
-        url,
-        data,
-        mergeHeadersAndConfig(headers, config),
+      withSelectData<T, R>(() =>
+        instanceWithAuth.post<T, R, D>(
+          url,
+          data,
+          mergeHeadersAndConfig(headers, config),
+        ),
       ),
     ),
   put: <T = unknown, R = AxiosResponse<T>, D = unknown>(
