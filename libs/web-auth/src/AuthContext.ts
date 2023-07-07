@@ -14,6 +14,7 @@ export type AppState = {
 type AuthContextValue = {
   user?: User;
   isAuthenticated: boolean;
+  isLoading: boolean;
   getAccessTokenSilently: (
     options?: GetTokenSilentlyOptions,
   ) => Promise<string>;
@@ -25,6 +26,7 @@ type AuthContextValue = {
 
 export const AuthContext = createContext<AuthContextValue>({
   isAuthenticated: false,
+  isLoading: true,
   getAccessTokenSilently: () => Promise.resolve(''),
   loginWithRedirect: () => Promise.resolve(),
   logout: () => Promise.resolve(),
