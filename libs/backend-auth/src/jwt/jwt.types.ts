@@ -11,7 +11,7 @@ export const JwtPayload = z.object({
   exp: z.number().optional(),
   iat: z.number().optional(),
   permissions: z.array(z.nativeEnum(Permission)).default([]),
-  org_id: z.string().optional(),
+  org_id: z.string(),
 });
 
 export type JwtPayload = z.infer<typeof JwtPayload>;

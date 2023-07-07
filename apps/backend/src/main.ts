@@ -20,7 +20,7 @@ async function bootstrap() {
   );
   app.useGlobalFilters(new HttpExceptionFilter());
   app.enableCors({
-    origin: 'http://localhost:3000',
+    origin: 'http://localhost:4200',
     credentials: true,
   });
 
