@@ -10,6 +10,7 @@ import {
   useEffect,
   useReducer,
   useRef,
+  useState,
 } from 'react';
 import { useNavigate } from 'react-router';
 
@@ -33,6 +34,7 @@ export type AuthProviderProps = PropsWithChildren<{
 
 export const AuthProvider = ({ client, children }: AuthProviderProps) => {
   const [state, dispatch] = useReducer(authReducer, authInitialState);
+  const [isLoading, setIsLoading] = useState(state.user === undefined);
   const navigate = useNavigate();
 
   const user = state.user;
@@ -60,6 +62,8 @@ export const AuthProvider = ({ client, children }: AuthProviderProps) => {
         dispatch(initialize(user));
       } catch (err) {
         dispatch(error(getLoginError()));
+      } finally {
+        setIsLoading(false);
       }
     })();
   }, [client, dispatch, navigate]);
@@ -100,6 +104,7 @@ export const AuthProvider = ({ client, children }: AuthProviderProps) => {
       value={{
         user,
         isAuthenticated,
+        isLoading,
         getAccessTokenSilently: handleGetAccessTokenSilently,
         loginWithRedirect: handleLoginWithRedirect,
         logout: handleLogout,
