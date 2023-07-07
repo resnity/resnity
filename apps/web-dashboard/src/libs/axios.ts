@@ -2,8 +2,10 @@ import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 
 import { auth0Client } from './auth0-client';
 
-const instanceWithAuth = axios.create();
-const instanceWithoutAuth = axios.create();
+const BASE_URL = 'http://localhost:8000/api';
+
+const instanceWithAuth = axios.create({ baseURL: BASE_URL });
+const instanceWithoutAuth = axios.create({ baseURL: BASE_URL });
 
 const withAuthHeader = async <R>(
   cb: (headers?: { Authorization: string }) => Promise<R>,

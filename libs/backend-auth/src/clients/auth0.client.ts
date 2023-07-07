@@ -19,7 +19,7 @@ export class Auth0ClientImpl implements OAuth2Client {
 
     const userInfo = response.data;
     const validateUserInfo: Validate<typeof userInfoSchema> =
-      schemaValidatorBuilder(userInfo, () => {
+      schemaValidatorBuilder(userInfoSchema, () => {
         throw new UnauthorizedError();
       });
     validateUserInfo(userInfo);
