@@ -1,46 +1,27 @@
-import { Button, Divider, Space, Typography } from 'antd';
-import React, { PropsWithChildren } from 'react';
+import { Divider, Grid, Stack, Typography } from '@mui/material';
+import { PropsWithChildren } from 'react';
 
-type HeaderButtonProps = {
-  icon: React.ReactNode;
-  text: string;
-  onClick?: () => void;
-};
-
-type PageContainerProps = PropsWithChildren<{
+type PageContainerProps = {
   title: string;
-  headerButton?: HeaderButtonProps;
-}>;
+  headerActionButtons?: React.ReactNode[];
+};
 
 export const PageContainer = ({
   title,
-  headerButton,
+  headerActionButtons,
   children,
-}: PageContainerProps) => {
+}: PropsWithChildren<PageContainerProps>) => {
   return (
-    <>
-      <Space size="large">
-        <Typography.Title
-          level={3}
-          style={{
-            margin: 0,
-          }}
-        >
+    <Stack spacing={2} divider={<Divider flexItem />}>
+      <Stack direction="row" alignItems="center" spacing={1} px={1}>
+        <Typography component="h1" variant="h4" fontWeight={500}>
           {title}
-        </Typography.Title>
-        {headerButton && (
-          <Button
-            onClick={headerButton.onClick}
-            type="dashed"
-            size="large"
-            icon={headerButton.icon}
-          >
-            {headerButton.text}
-          </Button>
-        )}
-      </Space>
-      <Divider />
-      {children}
-    </>
+        </Typography>
+        {headerActionButtons}
+      </Stack>
+      <Grid container xs={12} px={1}>
+        {children}
+      </Grid>
+    </Stack>
   );
 };

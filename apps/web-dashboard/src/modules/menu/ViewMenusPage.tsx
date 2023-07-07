@@ -1,4 +1,5 @@
 import { PlusOutlined } from '@ant-design/icons';
+import { IconButton } from '@mui/material';
 
 import { PageContainer } from '../../components/PageContainer';
 import { useModal } from '../../hooks/useModal';
@@ -11,11 +12,11 @@ export const ViewMenusPage = () => {
     <>
       <PageContainer
         title="Menus"
-        headerButton={{
-          icon: <PlusOutlined />,
-          text: 'Create Menu',
-          onClick: () => modal.open(),
-        }}
+        headerActionButtons={[
+          <IconButton onClick={modal.open}>
+            <PlusOutlined />
+          </IconButton>,
+        ]}
       ></PageContainer>
       <SetupMenuFlow modal={modal} />
     </>
