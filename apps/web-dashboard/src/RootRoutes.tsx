@@ -4,7 +4,7 @@ import { LoginPage, LogoutPage } from '@resnity/web-auth';
 
 import { DashboardLayout } from './components/DashboardLayout';
 import { PageContainer } from './components/PageContainer';
-import { ViewMenusPage } from './modules/menu/ViewMenusPage';
+import { ViewMenusPage } from './modules/menu/components/ViewMenusPage';
 import RestaurantRegistrationForm from './modules/restaurant/RestaurantRegistrationForm';
 
 export const RootRoutes = () => {

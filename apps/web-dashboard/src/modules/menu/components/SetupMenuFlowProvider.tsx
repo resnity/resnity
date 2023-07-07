@@ -1,13 +1,12 @@
-import { Modal } from 'antd';
 import { useState } from 'react';
 
-import { useModal } from '../../hooks/useModal';
-import { FlowProvider } from '../flow/FlowProvider';
-import { Flow } from '../flow/flow.types';
+import { FlowProvider } from '../../flow/FlowProvider';
+import { Flow } from '../../flow/flow.types';
 import { CreateCategoriesForm } from './CreateCategoriesForm';
 import { CreateItemsForm } from './CreateItemsForm';
 import { CreateMenuForm } from './CreateMenuForm';
 import { MenuSummary } from './MenuSummary';
+import { SetupMenuModal } from './SetupMenuModal';
 
 const setupMenuFlow: Flow = {
   steps: [
@@ -18,30 +17,36 @@ const setupMenuFlow: Flow = {
   ],
 };
 
-type SetupMenuFlowProps = {
-  modal: ReturnType<typeof useModal>;
+type SetupMenuFlowProviderProps = {
+  isOpen: boolean;
+  onClose: () => void;
 };
 
-export const SetupMenuFlow = ({ modal }: SetupMenuFlowProps) => {
+export const SetupMenuFlowProvider = ({
+  isOpen,
+  onClose,
+}: SetupMenuFlowProviderProps) => {
   const [stepIndex, setStepIndex] = useState(0);
 
   const nextStep = () => setStepIndex(stepIndex + 1);
 
   const previousStep = () => setStepIndex(stepIndex - 1);
 
-  const exit = () => setStepIndex(0);
+  const exit = () => {
+    setStepIndex(0);
+    onClose();
+  };
 
-  const complete = () => setStepIndex(0);
+  const complete = () => {
+    setStepIndex(0);
+    onClose();
+  };
 
   const currentStep = setupMenuFlow.steps[stepIndex];
   const CurrentStepComponent = currentStep.component;
 
-  const handleOk = () => {
-    nextStep();
-  };
-
   const handleClose = () => {
-    modal.close();
+    onClose();
     exit();
   };
 
@@ -55,14 +60,13 @@ export const SetupMenuFlow = ({ modal }: SetupMenuFlowProps) => {
         complete,
       }}
     >
-      <Modal
-        open={modal.isOpen}
-        onOk={handleOk}
-        onCancel={handleClose}
+      <SetupMenuModal
+        isOpen={isOpen}
         title={currentStep.title}
+        onClose={handleClose}
       >
         <CurrentStepComponent />
-      </Modal>
+      </SetupMenuModal>
     </FlowProvider>
   );
 };

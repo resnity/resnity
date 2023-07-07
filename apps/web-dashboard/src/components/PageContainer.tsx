@@ -2,13 +2,13 @@ import { Divider, Grid, Stack, Typography } from '@mui/material';
 import { PropsWithChildren } from 'react';
 
 type PageContainerProps = {
+  actions?: React.ReactNode[];
   title: string;
-  headerActionButtons?: React.ReactNode[];
 };
 
 export const PageContainer = ({
+  actions,
   title,
-  headerActionButtons,
   children,
 }: PropsWithChildren<PageContainerProps>) => {
   return (
@@ -17,9 +17,9 @@ export const PageContainer = ({
         <Typography component="h1" variant="h4" fontWeight={500}>
           {title}
         </Typography>
-        {headerActionButtons}
+        {actions}
       </Stack>
-      <Grid container xs={12} px={1}>
+      <Grid container px={1}>
         {children}
       </Grid>
     </Stack>
