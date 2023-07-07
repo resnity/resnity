@@ -14,7 +14,7 @@ export const RootRoutes = () => {
         <Route
           path="outlets"
           element={
-            <PageContainer title="Restaurants">
+            <PageContainer title="Outlets">
               <RestaurantRegistrationForm />
             </PageContainer>
           }
