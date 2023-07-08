@@ -83,11 +83,12 @@ export class UnauthorizedError extends AppError {
 }
 
 export class ForbiddenError extends AppError {
-  constructor() {
+  constructor(message = 'Forbidden', context?: string) {
     super({
       code: CommonAppErrorCode.NOT_FOUND,
       status: HttpStatus.FORBIDDEN,
-      message: 'Forbidden',
+      message,
+      context,
     });
   }
 }

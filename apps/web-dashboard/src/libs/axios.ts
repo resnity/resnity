@@ -1,4 +1,9 @@
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, {
+  AxiosError,
+  AxiosRequestConfig,
+  AxiosResponse,
+  HttpStatusCode,
+} from 'axios';
 
 import { auth0Client } from './auth0-client';
 
@@ -7,9 +12,9 @@ const BASE_URL = 'http://localhost:8000/api';
 const instanceWithAuth = axios.create({ baseURL: BASE_URL });
 const instanceWithoutAuth = axios.create({ baseURL: BASE_URL });
 
-const withAuthHeader = async <R>(
-  cb: (headers?: { Authorization: string }) => Promise<R>,
-): Promise<R> => {
+const withAuthHeader = async <T>(
+  cb: (headers?: { Authorization: string }) => Promise<T>,
+): Promise<T> => {
   const accessToken = await auth0Client.getTokenSilently();
   const headers = { Authorization: `Bearer ${accessToken}` };
   return cb(headers);
@@ -42,7 +47,7 @@ export const axiosWithAuth = {
     url: string,
     config?: AxiosRequestConfig<D>,
   ) =>
-    withAuthHeader((headers) =>
+    withAuthHeader<T>((headers) =>
       withSelectData<T, R>(() =>
         instanceWithAuth.get<T, R, D>(
           url,
@@ -103,5 +108,11 @@ export const axiosWithAuth = {
       ),
     ),
 };
+
+export const isUnauthorizedStatus = (error: AxiosError) =>
+  error.response && error.response.status === HttpStatusCode.Unauthorized;
+
+export const isForbiddenStatus = (error: AxiosError) =>
+  error.response && error.response.status === HttpStatusCode.Forbidden;
 
 export { instanceWithoutAuth as axiosWithoutAuth };

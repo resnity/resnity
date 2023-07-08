@@ -29,7 +29,7 @@ export const SetupRestaurantPage = () => {
   });
 
   useLayoutEffect(() => {
-    if (isSuccess) navigate('/dashboard');
+    if (isSuccess) navigate('/');
   }, [isSuccess, navigate]);
 
   return (

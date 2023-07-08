@@ -38,6 +38,7 @@ export class RestaurantController {
     private readonly _mapper: RestaurantMapper,
   ) {}
 
+  @Auth({ requiredPermissions: [Permission.READ_RESTAURANT] })
   @Get()
   async getRestaurants() {
     const restaurants = await this._services.getRestaurants();
