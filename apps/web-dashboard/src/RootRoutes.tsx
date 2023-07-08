@@ -9,12 +9,12 @@ import { SetupRestaurantPage } from './modules/restaurant/components/SetupRestau
 export const RootRoutes = () => {
   return (
     <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/logout" element={<LogoutPage />} />
       <Route path="/setup-restaurant" element={<SetupRestaurantPage />} />
       <Route path="/" element={<DashboardLayout />}>
         <Route path="menus" element={<ViewMenusPage />} />
       </Route>
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/logout" element={<LogoutPage />} />
     </Routes>
   );
 };
