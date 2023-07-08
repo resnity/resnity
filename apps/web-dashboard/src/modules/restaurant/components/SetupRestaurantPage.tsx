@@ -4,11 +4,13 @@ import { useLayoutEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router';
 
-import { ControlledTextField } from '../../../components/ControlledTextField';
+import { BackdropLoaderContainer } from '../../../components/BackdropLoaderContainer';
 import { SectionContainer } from '../../../components/SectionContainer';
-import { LoadingProvider } from '../../../providers/LoadingProvider';
-import { createRestaurantFormSchema } from '../restaurant.forms';
-import { CreateRestaurantFormData } from '../restaurant.forms.types';
+import { ControlledTextField } from '../../../components/form/ControlledTextField';
+import {
+  CreateRestaurantFormData,
+  createRestaurantFormSchema,
+} from '../restaurant.forms';
 import { useCreateRestaurant } from '../restaurant.queries';
 
 export const SetupRestaurantPage = () => {
@@ -31,7 +33,7 @@ export const SetupRestaurantPage = () => {
   }, [isSuccess, navigate]);
 
   return (
-    <LoadingProvider isLoading={isLoading}>
+    <BackdropLoaderContainer isLoading={isLoading}>
       <Stack
         alignItems="center"
         justifyContent="center"
@@ -61,6 +63,6 @@ export const SetupRestaurantPage = () => {
           </SectionContainer>
         </Box>
       </Stack>
-    </LoadingProvider>
+    </BackdropLoaderContainer>
   );
 };

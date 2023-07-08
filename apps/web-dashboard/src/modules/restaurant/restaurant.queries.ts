@@ -1,10 +1,10 @@
 import { UseMutationOptions, useMutation } from '@tanstack/react-query';
 
-import { createRestaurant } from './restaurant.services';
+import { createRestaurant } from '../../services/restaurant.services';
 import {
   CreateRestaurantRequestDto,
   CreateRestaurantResponseDto,
-} from './restaurant.services.types';
+} from '../../services/restaurant.services.types';
 
 export const useCreateRestaurant = (
   options?: Omit<

@@ -1,10 +1,5 @@
-import { z } from 'zod';
-
 import { CreateImagePayload } from '../domain/value-objects/image.value-object.types';
-import {
-  CreatePricePayload,
-  priceCurrencies,
-} from '../domain/value-objects/price.value-object.types';
+import { CreatePricePayload } from '../domain/value-objects/price.value-object.types';
 import { CreateServiceSchedulePayload } from '../domain/value-objects/service-schedule.value-object.types';
 import { CreateTimePeriodPayload } from '../domain/value-objects/time-period.value-object.types';
 
