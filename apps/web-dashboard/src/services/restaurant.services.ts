@@ -1,4 +1,4 @@
-import { axiosWithAuth } from '../../libs/axios';
+import { axiosWithAuth } from '../libs/axios';
 import {
   CreateRestaurantRequestDto,
   CreateRestaurantResponseDto,

@@ -3,7 +3,7 @@ import { Route, Routes } from 'react-router';
 import { LoginPage, LogoutPage } from '@resnity/web-auth';
 
 import { DashboardLayout } from './components/DashboardLayout';
-import { ViewMenusPage } from './modules/menu/components/ViewMenusPage';
+import { MenusOverviewPage } from './modules/menu/menus-overview/MenusOverviewPage';
 import { SetupRestaurantPage } from './modules/restaurant/components/SetupRestaurantPage';
 
 export const RootRoutes = () => {
@@ -13,7 +13,7 @@ export const RootRoutes = () => {
       <Route path="/logout" element={<LogoutPage />} />
       <Route path="/setup-restaurant" element={<SetupRestaurantPage />} />
       <Route path="/" element={<DashboardLayout />}>
-        <Route path="menus" element={<ViewMenusPage />} />
+        <Route path="menus" element={<MenusOverviewPage />} />
       </Route>
     </Routes>
   );

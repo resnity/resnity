@@ -1,5 +1,6 @@
 import BorderColorIcon from '@mui/icons-material/BorderColor';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
@@ -14,31 +15,33 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  AppBar as MuiAppBar,
-  AppBarProps as MuiAppBarProps,
-  Toolbar,
+  Stack,
+  StackProps,
+  Theme,
   Typography,
   styled,
+  useMediaQuery,
 } from '@mui/material';
-import { useLayoutEffect, useState } from 'react';
+import { useLayoutEffect } from 'react';
 import { Link, Outlet } from 'react-router-dom';
 
 import { useAuth } from '@resnity/web-auth';
 
+import { useModal } from '../hooks/useModal';
+import { theme } from '../theme';
+
 const drawerWidth = 240;
 
-type AppBarProps = MuiAppBarProps & {
+type AppBarProps = StackProps & {
   isDrawerOpen: boolean;
 };
 
 export const DashboardLayout = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const isSmall = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'));
+  const { isOpen, toggle } = useModal(!isSmall);
 
-  const { user, isAuthenticated, isLoading, loginWithRedirect } = useAuth();
-
-  const handleDrawerOpen = () => setIsOpen(true);
-
-  const handleDrawerClose = () => setIsOpen(false);
+  const { user, isAuthenticated, isLoading, loginWithRedirect, logout } =
+    useAuth();
 
   useLayoutEffect(() => {
     if (!isLoading && !isAuthenticated) loginWithRedirect();
@@ -46,23 +49,31 @@ export const DashboardLayout = () => {
 
   return (
     <Box sx={{ display: 'flex' }}>
-      <AppBar position="fixed" isDrawerOpen={isOpen}>
-        <Toolbar>
+      <AppBar
+        isDrawerOpen={isOpen}
+        direction="row"
+        alignItems="center"
+        justifyContent="space-between"
+        sx={{
+          px: 3,
+          position: 'fixed',
+          height: theme.mixins.toolbar,
+        }}
+      >
+        <Stack direction="row" alignItems="center" spacing={1}>
           <IconButton
             size="large"
             edge="start"
             color="inherit"
-            aria-label="menu"
-            sx={{ mr: 2 }}
-            onClick={handleDrawerOpen}
+            onClick={toggle}
           >
-            <MenuIcon />
+            {isOpen ? <ChevronLeftIcon /> : <MenuIcon />}
           </IconButton>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+          <Typography variant="h6" component="div">
             RESNITY
           </Typography>
-          <Avatar alt={user?.name} src={user?.picture} />
-        </Toolbar>
+        </Stack>
+        <Avatar alt={user?.name} src={user?.picture} />
       </AppBar>
       <Drawer
         sx={{
@@ -76,11 +87,7 @@ export const DashboardLayout = () => {
         variant="persistent"
         open={isOpen}
       >
-        <DrawerHeader>
-          <IconButton onClick={handleDrawerClose}>
-            <ChevronLeftIcon />
-          </IconButton>
-        </DrawerHeader>
+        <DrawerHeader />
         <Divider />
         <List>
           <ListItem disablePadding>
@@ -107,6 +114,18 @@ export const DashboardLayout = () => {
               <ListItemText primary="Orders" />
             </ListItemButton>
           </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton
+              onClick={() =>
+                logout({ logoutParams: { returnTo: window.location.origin } })
+              }
+            >
+              <ListItemIcon>
+                <LogoutIcon />
+              </ListItemIcon>
+              <ListItemText primary="Logout" />
+            </ListItemButton>
+          </ListItem>
         </List>
       </Drawer>
       <Main isDrawerOpen={isOpen}>
@@ -117,9 +136,11 @@ export const DashboardLayout = () => {
   );
 };
 
-const AppBar = styled(MuiAppBar, {
+const AppBar = styled(Stack, {
   shouldForwardProp: (prop) => prop !== 'isDrawerOpen',
 })<AppBarProps>(({ theme, isDrawerOpen }) => ({
+  width: '100%',
+  px: 3,
   transition: theme.transitions.create(['margin', 'width'], {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,

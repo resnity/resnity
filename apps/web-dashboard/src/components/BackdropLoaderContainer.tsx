@@ -1,14 +1,14 @@
 import { Backdrop, CircularProgress } from '@mui/material';
 import { PropsWithChildren } from 'react';
 
-type LoadingProviderProps = {
+type BackdropLoaderContainerProps = {
   isLoading: boolean;
 };
 
-export const LoadingProvider = ({
+export const BackdropLoaderContainer = ({
   isLoading,
   children,
-}: PropsWithChildren<LoadingProviderProps>) => {
+}: PropsWithChildren<BackdropLoaderContainerProps>) => {
   return (
     <>
       {children}

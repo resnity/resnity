@@ -5,3 +5,8 @@ export type CreateRestaurantRequestDto = {
 export type CreateRestaurantResponseDto = {
   id: string;
 };
+
+export type RestaurantResponseDto = {
+  id: string;
+  name: string;
+};
