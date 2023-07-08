@@ -1,6 +1,8 @@
 import { Collection, Filter, OptionalUnlessRequiredId } from 'mongodb';
 
+import { ForbiddenError } from '../application/app-errors';
 import { Entity, EntityId } from '../domain/entity';
+import { isNil } from '../libs/guards';
 import {
   APP_CLS_TENANT_ID,
   APP_CLS_TRANSACTION_SESSION,
@@ -15,15 +17,10 @@ export interface Repository<
   TModel extends Model,
 > {
   findMany(): Promise<TEntity[]>;
-
   findById(id: Filter<TModel>['_id']): Promise<TEntity | undefined>;
-
   create(entity: TEntity): Promise<void>;
-
   update(entity: TEntity): Promise<void>;
-
   remove(entity: TEntity): Promise<void>;
-
   withTransaction<T>(fn: () => Promise<T>): Promise<T>;
 }
 
@@ -40,10 +37,9 @@ export class RepositoryImpl<
   ) {}
 
   async findMany() {
-    const tenantIdFilter: Filter<TModel>['tenantId'] | undefined =
-      this._appClsService.get(APP_CLS_TENANT_ID);
+    const tenantId: Filter<TModel>['tenantId'] = this._getTenantId();
 
-    const result = this._collection.find<TModel>({ tenantId: tenantIdFilter });
+    const result = this._collection.find<TModel>({ tenantId });
     const models = await result.toArray();
 
     return this._mapper.fromPersistenceModels(models);
@@ -59,31 +55,31 @@ export class RepositoryImpl<
 
   async create(entity: TEntity) {
     const model = this._mapper.toPersistenceModel(entity);
-    const tenantId = this._appClsService.get(APP_CLS_TENANT_ID);
-
-    const tenantAwareModel = { ...model, tenantId };
+    const tenantAwaredModel = { ...model, tenantId: this._getTenantId() };
 
     await this._collection.insertOne(
-      tenantAwareModel as OptionalUnlessRequiredId<TModel>,
+      tenantAwaredModel as OptionalUnlessRequiredId<TModel>,
       { session: this._getSession() },
     );
   }
 
   async update(entity: TEntity) {
-    const { _id, ...model } = this._mapper.toPersistenceModel(entity);
-    const idFilter: Filter<TModel>['_id'] = _id;
-    const tenantId = this._appClsService.get(APP_CLS_TENANT_ID);
+    const model = this._mapper.toPersistenceModel(entity);
 
-    const tenantAwareModel = { ...model, tenantId };
-    await this._collection.replaceOne({ _id: idFilter }, tenantAwareModel, {
+    const _id: Filter<TModel>['_id'] = model._id;
+    const tenantAwareModel = { ...model, tenantId: this._getTenantId() };
+
+    await this._collection.replaceOne({ _id: _id }, tenantAwareModel, {
       session: this._getSession(),
     });
   }
 
   async remove(entity: TEntity) {
-    const idFilter: Filter<TModel>['_id'] = entity.id;
+    const _id: Filter<TModel>['_id'] = entity.id;
+    const tenantId: Filter<TModel>['tenantId'] = this._getTenantId();
+
     await this._collection.deleteOne(
-      { _id: idFilter },
+      { _id, tenantId },
       { session: this._getSession() },
     );
   }
@@ -108,5 +104,11 @@ export class RepositoryImpl<
 
   private _getSession() {
     return this._appClsService.get(APP_CLS_TRANSACTION_SESSION);
+  }
+
+  private _getTenantId() {
+    const tenantId = this._appClsService.get(APP_CLS_TENANT_ID);
+    if (isNil(tenantId)) throw new ForbiddenError('TenantId is missing');
+    return tenantId;
   }
 }
