@@ -13,6 +13,12 @@ export type BaseEntityPayload<T> = {
   updatedAt: Date;
 } & T;
 
+export type MaybeBaseEntityPayload<T> = {
+  id?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+} & T;
+
 export class Entity<T extends EntityId> {
   protected _id: T;
   protected _createdAt: Date;

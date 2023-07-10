@@ -8,20 +8,20 @@ import {
   isNil,
 } from '@resnity/backend-common';
 
-import { MenuId, assertMenuIdsValid } from '../common/menu.types';
-import { OrderId, assertOrderIdsValid } from '../common/order.types';
 import { RestaurantErrorCode } from '../restaurant.errors';
-import { Address } from '../value-object/address.value-object';
-import { Contact } from '../value-object/contact.value-object';
-import { ServiceSchedule } from '../value-object/service-schedule.value-object';
+import { MenuId, assertMenuIdsValid } from '../shared/menu.types';
+import { OrderId, assertOrderIdsValid } from '../shared/order.types';
+import { Address } from '../value-objects/address.value-object';
+import { Contact } from '../value-objects/contact.value-object';
+import { ServiceSchedule } from '../value-objects/service-schedule.value-object';
 import {
-  CreateOutletPayload,
-  OutletId,
-  OutletName,
-  UpdateOutletPayload,
-  assertOutletIdValid,
-  assertOutletNameValid,
-} from './outlet.entity.types';
+  CreateStorePayload,
+  StoreId,
+  StoreName,
+  UpdateStorePayload,
+  assertStoreIdValid,
+  assertStoreNameValid,
+} from './store.entity.types';
 import { Table } from './table.entity';
 import {
   CreateTablePayload,
@@ -30,17 +30,17 @@ import {
   assertTableIdValid,
 } from './table.entity.types';
 
-export class Outlet extends Entity<OutletId> {
+export class Store extends Entity<StoreId> {
   private _menuIds: MenuId[];
   private _orderIds: OrderId[];
-  private _name: OutletName;
+  private _name: StoreName;
   private _tables: Table[];
   private _address: Address;
   private _contact: Contact;
   private _serviceSchedule: ServiceSchedule;
 
-  static create(payload: CreateOutletPayload) {
-    return Outlet.new({
+  static create(payload: CreateStorePayload) {
+    return Store.new({
       id: createEntityId(),
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -48,25 +48,25 @@ export class Outlet extends Entity<OutletId> {
     });
   }
 
-  static new(payload: BaseEntityPayload<CreateOutletPayload>) {
-    assertOutletIdValid(payload.id);
+  static new(payload: BaseEntityPayload<CreateStorePayload>) {
+    assertStoreIdValid(payload.id);
     assertMenuIdsValid(payload.menuIds);
     assertOrderIdsValid(payload.orderIds);
-    assertOutletNameValid(payload.name);
+    assertStoreNameValid(payload.name);
 
-    const outlet = new Outlet();
-    outlet.id = payload.id;
-    outlet.menuIds = payload.menuIds;
-    outlet.orderIds = payload.orderIds;
-    outlet.name = payload.name;
-    outlet.tables = payload.tables.map(Table.create);
-    outlet.address = Address.create(payload.address);
-    outlet.contact = Contact.create(payload.contact);
-    outlet.serviceSchedule = ServiceSchedule.create(payload.serviceSchedule);
-    return outlet;
+    const store = new Store();
+    store.id = payload.id;
+    store.menuIds = payload.menuIds;
+    store.orderIds = payload.orderIds;
+    store.name = payload.name;
+    store.tables = payload.tables.map(Table.create);
+    store.address = Address.create(payload.address);
+    store.contact = Contact.create(payload.contact);
+    store.serviceSchedule = ServiceSchedule.create(payload.serviceSchedule);
+    return store;
   }
 
-  update(payload: UpdateOutletPayload) {
+  update(payload: UpdateStorePayload) {
     this._update(payload);
     this._setUpdatedAtToNow();
     return this._id;
@@ -90,7 +90,7 @@ export class Outlet extends Entity<OutletId> {
     this._setUpdatedAtToNow();
   }
 
-  private _update(payload: UpdateOutletPayload) {
+  private _update(payload: UpdateStorePayload) {
     if (payload.menuIds) {
       assertMenuIdsValid(payload.menuIds);
       this.menuIds = payload.menuIds;
@@ -100,7 +100,7 @@ export class Outlet extends Entity<OutletId> {
       this.orderIds = payload.orderIds;
     }
     if (payload.name) {
-      assertOutletNameValid(payload.name);
+      assertStoreNameValid(payload.name);
       this.name = payload.name;
     }
     if (payload.address) {
@@ -124,7 +124,7 @@ export class Outlet extends Entity<OutletId> {
     const table = this._getTableById(tableId);
     if (isNil(table))
       throw DomainError.ofCode(
-        RestaurantErrorCode.RESTAURANT_OUTLET_TABLE_NOT_FOUND,
+        RestaurantErrorCode.RESTAURANT_STORE_TABLE_NOT_FOUND,
       );
     table.update(payload);
   }
@@ -133,7 +133,7 @@ export class Outlet extends Entity<OutletId> {
     const table = this._getTableById(tableId);
     if (isNil(table))
       throw DomainError.ofCode(
-        RestaurantErrorCode.RESTAURANT_OUTLET_TABLE_NOT_FOUND,
+        RestaurantErrorCode.RESTAURANT_STORE_TABLE_NOT_FOUND,
       );
 
     const indexToRemove = this._tables.findIndex(
@@ -163,10 +163,10 @@ export class Outlet extends Entity<OutletId> {
   }
 
   @AutoMap()
-  get name(): OutletName {
+  get name(): StoreName {
     return this._name;
   }
-  set name(value: OutletName) {
+  set name(value: StoreName) {
     this._name = value;
   }
 

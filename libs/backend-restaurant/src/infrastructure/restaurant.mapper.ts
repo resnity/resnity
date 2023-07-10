@@ -12,25 +12,25 @@ import {
 import {
   AddressResponseDto,
   ContactResponseDto,
-  OutletResponseDto,
   RestaurantResponseDto,
   ServiceScheduleResponseDto,
+  StoreResponseDto,
   TableResponseDto,
   TimePeriodResponseDto,
 } from '../api/restaurant.dtos';
-import { Outlet } from '../domain/entity/outlet.entity';
-import { Table } from '../domain/entity/table.entity';
+import { Store } from '../domain/entities/store.entity';
+import { Table } from '../domain/entities/table.entity';
 import { Restaurant } from '../domain/restaurant.aggregate-root';
-import { Address } from '../domain/value-object/address.value-object';
-import { Contact } from '../domain/value-object/contact.value-object';
-import { ServiceSchedule } from '../domain/value-object/service-schedule.value-object';
-import { TimePeriod } from '../domain/value-object/time-period.value-object';
+import { Address } from '../domain/value-objects/address.value-object';
+import { Contact } from '../domain/value-objects/contact.value-object';
+import { ServiceSchedule } from '../domain/value-objects/service-schedule.value-object';
+import { TimePeriod } from '../domain/value-objects/time-period.value-object';
 import {
   AddressModel,
   ContactModel,
-  OutletModel,
   RestaurantModel,
   ServiceScheduleModel,
+  StoreModel,
   TableModel,
   TimePeriodModel,
 } from './restaurant.models';
@@ -48,8 +48,8 @@ export const restaurantMappingProfile: MappingProfile = (mapper) => {
   );
   createMap(
     mapper,
-    Outlet,
-    OutletResponseDto,
+    Store,
+    StoreResponseDto,
     extendBaseEntityToResponseDtoMap(mapper),
   );
   createMap(
@@ -64,7 +64,7 @@ export const restaurantMappingProfile: MappingProfile = (mapper) => {
   createMap(mapper, TimePeriod, TimePeriodModel);
   createMap(mapper, ServiceSchedule, ServiceScheduleModel);
   createMap(mapper, Table, TableModel, extendBaseEntityToModelMap(mapper));
-  createMap(mapper, Outlet, OutletModel, extendBaseEntityToModelMap(mapper));
+  createMap(mapper, Store, StoreModel, extendBaseEntityToModelMap(mapper));
   createMap(
     mapper,
     Restaurant,
@@ -77,7 +77,7 @@ export const restaurantMappingProfile: MappingProfile = (mapper) => {
   createMap(mapper, TimePeriodModel, TimePeriod);
   createMap(mapper, ServiceScheduleModel, ServiceSchedule);
   createMap(mapper, TableModel, Table, extendBaseModelToEntityMap(mapper));
-  createMap(mapper, OutletModel, Outlet, extendBaseModelToEntityMap(mapper));
+  createMap(mapper, StoreModel, Store, extendBaseModelToEntityMap(mapper));
   createMap(
     mapper,
     RestaurantModel,

@@ -5,6 +5,7 @@ export { EmbeddedResponseDto, ResponseDto } from './api/response-dtos';
 export {
   AppError,
   ForbiddenError,
+  InternalServerError,
   NotFoundError,
   UnauthorizedError,
 } from './application/app-errors';
@@ -16,6 +17,7 @@ export {
   BaseEntityPayload,
   Entity,
   EntityId,
+  MaybeBaseEntityPayload,
 } from './domain/entity';
 export { ValueObject } from './domain/value-object';
 export { DomainEvent } from './domain/domain-event';

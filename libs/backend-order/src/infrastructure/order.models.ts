@@ -78,7 +78,7 @@ export class OrderModel extends Model {
   @AutoMap()
   readonly restaurantId: string;
   @AutoMap()
-  readonly outletId: string;
+  readonly storeId: string;
   @AutoMap()
   readonly tableId?: string;
   @AutoMap()

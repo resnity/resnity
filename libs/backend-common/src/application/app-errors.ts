@@ -92,3 +92,13 @@ export class ForbiddenError extends AppError {
     });
   }
 }
+
+export class InternalServerError extends AppError {
+  constructor() {
+    super({
+      code: CommonAppErrorCode.INTERNAL_SERVER_ERROR,
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
+      message: 'Internal server error',
+    });
+  }
+}
