@@ -1,3 +1,4 @@
+import { CacheModule } from '@nestjs/cache-manager';
 import { Global, Module } from '@nestjs/common';
 
 import { AppClsModule } from '@resnity/backend-common';
@@ -9,7 +10,13 @@ import { UserModule } from './user/user.module';
 
 @Global()
 @Module({
-  imports: [AppClsModule, JwtModule, OrganizationModule, UserModule],
+  imports: [
+    AppClsModule,
+    CacheModule.register(),
+    JwtModule,
+    OrganizationModule,
+    UserModule,
+  ],
   providers: [AccessTokenGuard],
   exports: [AccessTokenGuard, JwtModule, OrganizationModule, UserModule],
 })

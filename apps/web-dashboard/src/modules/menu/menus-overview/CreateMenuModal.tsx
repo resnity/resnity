@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@mui/material';
+import { useQueryClient } from '@tanstack/react-query';
 import { useLayoutEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -7,7 +8,7 @@ import { BackdropLoaderContainer } from '../../../components/BackdropLoaderConta
 import { ControlledTextField } from '../../../components/form/ControlledTextField';
 import { FormModal } from '../../../components/form/FormModal';
 import { CreateMenuFormData, createMenuFormSchema } from '../menu.forms';
-import { useCreateMenu } from '../menu.queries';
+import { MENUS_QUERY_KEY, useCreateMenu } from '../menu.queries';
 
 type CreateMenuModalProps = {
   isOpen: boolean;
@@ -20,6 +21,7 @@ export const CreateMenuModal = ({ isOpen, onClose }: CreateMenuModalProps) => {
       defaultValues: { name: '' },
       resolver: zodResolver(createMenuFormSchema),
     });
+  const queryClient = useQueryClient();
 
   const { isLoading, isSuccess, mutate } = useCreateMenu();
 
@@ -28,8 +30,11 @@ export const CreateMenuModal = ({ isOpen, onClose }: CreateMenuModalProps) => {
   });
 
   useLayoutEffect(() => {
-    if (isSuccess) onClose();
-  }, [isSuccess, onClose]);
+    if (isSuccess) {
+      queryClient.invalidateQueries([MENUS_QUERY_KEY]);
+      onClose();
+    }
+  }, [isSuccess, queryClient, onClose]);
 
   return (
     <BackdropLoaderContainer isLoading={isLoading}>

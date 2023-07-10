@@ -21,11 +21,11 @@ import {
   UpdateItemServicePayload,
   UpdateMenuServicePayload,
   UpdateModifierServicePayload,
-} from './menu.services.types';
+} from './menu.service.types';
 
 export const MENU_SERVICES_TOKEN = Symbol('MENU_SERVICES_TOKEN');
 
-export interface MenuServices {
+export interface MenuService {
   getMenus(): Promise<Menu[]>;
   createMenu(payload: CreateMenuServicePayload): Promise<string>;
   updateMenuById(
@@ -68,7 +68,7 @@ export interface MenuServices {
   removeModifierById(menuId: string, modifierId: string): Promise<void>;
 }
 
-export class MenuServicesImpl implements MenuServices {
+export class MenuServiceImpl implements MenuService {
   constructor(
     private readonly _eventEmitter: EventEmitter2,
     @Inject(MENU_REPOSITORY_TOKEN)

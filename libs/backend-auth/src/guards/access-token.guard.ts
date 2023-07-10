@@ -13,13 +13,8 @@ import {
   UnauthorizedError,
 } from '@resnity/backend-common';
 
-import {
-  JWT_SERVICE_TOKEN,
-  ORGANIZATION_SERVICE_TOKEN,
-  USER_SERVICE_TOKEN,
-} from '../auth.constants';
+import { JWT_SERVICE_TOKEN, USER_SERVICE_TOKEN } from '../auth.constants';
 import { JwtService } from '../jwt/jwt.service';
-import { OrganizationService } from '../organization/organization.service';
 import { UserService } from '../user/user.service';
 import { User } from '../user/user.service.types';
 
@@ -28,8 +23,6 @@ export class AccessTokenGuard implements CanActivate {
   constructor(
     @Inject(JWT_SERVICE_TOKEN) private readonly _jwtService: JwtService,
     @Inject(USER_SERVICE_TOKEN) private readonly _userService: UserService,
-    @Inject(ORGANIZATION_SERVICE_TOKEN)
-    private readonly _organizationService: OrganizationService,
     private readonly _appClsService: AppClsService<User>,
   ) {}
 
@@ -42,15 +35,13 @@ export class AccessTokenGuard implements CanActivate {
     try {
       const jwtPayload = await this._jwtService.validate(token);
       const user = await this._userService.getUserByAccessToken(token);
-      const organization = await this._organizationService.getOrganizationById(
-        user.org_id,
-      );
 
       user.permissions = jwtPayload.permissions;
 
       this._appClsService.set(APP_CLS_TENANT_ID, user.org_id);
       this._appClsService.set(APP_CLS_USER, user);
     } catch (err) {
+      console.log(err);
       throw new UnauthorizedError();
     }
 

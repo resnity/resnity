@@ -5,6 +5,7 @@ import {
   CreateRestaurantRequestDto,
   CreateRestaurantResponseDto,
   RestaurantResponseDto,
+  SetupRestaurantResponseDto,
 } from './restaurant.services.types';
 
 const BASE_PATH = '/restaurants';
@@ -20,7 +21,10 @@ export const getCurrentRestaurant = async () =>
   );
 
 export const setupRestaurant = async () =>
-  await axiosWithAuth.post(`${BASE_PATH}/setup`, {});
+  await axiosWithAuth.post<SuccessHttpResponse<SetupRestaurantResponseDto>>(
+    `${BASE_PATH}/setup`,
+    {},
+  );
 
 export const createRestaurant = async (data: CreateRestaurantRequestDto) =>
   await axiosWithAuth.post<SuccessHttpResponse<CreateRestaurantResponseDto>>(

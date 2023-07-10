@@ -6,15 +6,13 @@ import {
   CreateCategoryServicePayload,
   CreateImageServicePayload,
   CreateItemServicePayload,
-  CreateMenuServicePayload,
   CreateModifierServicePayload,
   CreatePriceServicePayload,
   CreateServiceScheduleServicePayload,
   CreateTimePeriodServicePayload,
   UpdateItemServicePayload,
-  UpdateMenuServicePayload,
   UpdateModifierServicePayload,
-} from '../application/menu.services.types';
+} from '../application/menu.service.types';
 import { RawPriceCurrency } from '../domain/value-objects/price.value-object.types';
 
 export class PriceResponseDto extends EmbeddedResponseDto {
@@ -103,12 +101,11 @@ export class MenuResponseDto extends ResponseDto {
   readonly modifiers: ModifierResponseDto[];
 }
 
-export class CreateMenuRequestBody implements CreateMenuServicePayload {
+export class CreateMenuRequestBody {
   readonly name: string;
-  readonly restaurantId: string;
 }
 
-export class UpdateMenuRequestBody implements UpdateMenuServicePayload {
+export class UpdateMenuRequestBody {
   readonly name?: string;
 }
 

@@ -53,19 +53,16 @@ export const useCurrentGetRestaurants = (
   });
 
 export const useSetupRestaurant = (
-  options?: Omit<
-    UseMutationOptions<SetupRestaurantResponseDto, AxiosError<unknown>>,
-    'mutationFn'
+  options?: UseMutationOptions<
+    SuccessHttpResponse<SetupRestaurantResponseDto>,
+    AxiosError<unknown>
   >,
 ) => useMutation({ mutationFn: setupRestaurant, ...options });
 
 export const useCreateRestaurant = (
-  options?: Omit<
-    UseMutationOptions<
-      CreateRestaurantResponseDto,
-      AxiosError<unknown>,
-      CreateRestaurantRequestDto
-    >,
-    'mutationFn'
+  options?: UseMutationOptions<
+    SuccessHttpResponse<CreateRestaurantResponseDto>,
+    AxiosError<unknown>,
+    CreateRestaurantRequestDto
   >,
-) => useMutation({ mutationFn: createRestaurant, ...options });
+) => useMutation({ ...options, mutationFn: createRestaurant });

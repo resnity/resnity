@@ -12,9 +12,9 @@ const BASE_URL = 'http://localhost:8000/api';
 const instanceWithAuth = axios.create({ baseURL: BASE_URL });
 const instanceWithoutAuth = axios.create({ baseURL: BASE_URL });
 
-const withAuthHeader = async <T>(
-  cb: (headers?: { Authorization: string }) => Promise<T>,
-): Promise<T> => {
+const withAuthHeader = async <T, R extends AxiosResponse<T> = AxiosResponse<T>>(
+  cb: (headers?: { Authorization: string }) => Promise<R>,
+): Promise<R> => {
   const accessToken = await auth0Client.getTokenSilently();
   const headers = { Authorization: `Bearer ${accessToken}` };
   return cb(headers);
@@ -25,7 +25,7 @@ const withSelectData = async <
   R extends AxiosResponse<T> = AxiosResponse<T>,
 >(
   cb: () => Promise<R>,
-): Promise<AxiosResponse['data']> => {
+): Promise<R['data']> => {
   const response = await cb();
   return response.data;
 };
@@ -47,8 +47,8 @@ export const axiosWithAuth = {
     url: string,
     config?: AxiosRequestConfig<D>,
   ) =>
-    withAuthHeader<T>((headers) =>
-      withSelectData<T, R>(() =>
+    withSelectData<T, R>(() =>
+      withAuthHeader<T, R>((headers) =>
         instanceWithAuth.get<T, R, D>(
           url,
           mergeHeadersAndConfig(headers, config),
@@ -64,8 +64,8 @@ export const axiosWithAuth = {
     data: D,
     config?: AxiosRequestConfig<D>,
   ) =>
-    withAuthHeader((headers) =>
-      withSelectData<T, R>(() =>
+    withSelectData<T, R>(() =>
+      withAuthHeader<T, R>((headers) =>
         instanceWithAuth.post<T, R, D>(
           url,
           data,
@@ -73,38 +73,56 @@ export const axiosWithAuth = {
         ),
       ),
     ),
-  put: <T = unknown, R = AxiosResponse<T>, D = unknown>(
+  put: <
+    T = unknown,
+    R extends AxiosResponse<T> = AxiosResponse<T>,
+    D = unknown,
+  >(
     url: string,
     data: D,
     config?: AxiosRequestConfig<D>,
   ) =>
-    withAuthHeader((headers) =>
-      instanceWithAuth.post<T, R, D>(
-        url,
-        data,
-        mergeHeadersAndConfig(headers, config),
+    withSelectData<T, R>(() =>
+      withAuthHeader<T, R>((headers) =>
+        instanceWithAuth.put<T, R, D>(
+          url,
+          data,
+          mergeHeadersAndConfig(headers, config),
+        ),
       ),
     ),
-  patch: <T = unknown, R = AxiosResponse<T>, D = unknown>(
+  patch: <
+    T = unknown,
+    R extends AxiosResponse<T> = AxiosResponse<T>,
+    D = unknown,
+  >(
     url: string,
     data: D,
     config?: AxiosRequestConfig<D>,
   ) =>
-    withAuthHeader((headers) =>
-      instanceWithAuth.post<T, R, D>(
-        url,
-        data,
-        mergeHeadersAndConfig(headers, config),
+    withSelectData<T, R>(() =>
+      withAuthHeader<T, R>((headers) =>
+        instanceWithAuth.patch<T, R, D>(
+          url,
+          data,
+          mergeHeadersAndConfig(headers, config),
+        ),
       ),
     ),
-  delete: <T = unknown, R = AxiosResponse<T>, D = unknown>(
+  delete: <
+    T = unknown,
+    R extends AxiosResponse<T> = AxiosResponse<T>,
+    D = unknown,
+  >(
     url: string,
     config?: AxiosRequestConfig<D>,
   ) =>
-    withAuthHeader((headers) =>
-      instanceWithAuth.get<T, R, D>(
-        url,
-        mergeHeadersAndConfig(headers, config),
+    withSelectData<T, R>(() =>
+      withAuthHeader<T, R>((headers) =>
+        instanceWithAuth.delete<T, R>(
+          url,
+          mergeHeadersAndConfig(headers, config),
+        ),
       ),
     ),
 };

@@ -1,4 +1,5 @@
 import { AuthenticationClient as Auth0AuthenticationClient } from 'auth0';
+import { Cache } from 'cache-manager';
 import { isNil } from 'lodash';
 
 import {
@@ -15,11 +16,13 @@ export type UserService = {
 };
 
 export class UserServiceImpl implements UserService {
-  constructor(private readonly _client: Auth0AuthenticationClient) {}
+  constructor(
+    private readonly _auth0AuthenticationClient: Auth0AuthenticationClient,
+    private readonly _cacheManager: Cache,
+  ) {}
 
   async getUserByAccessToken(accessToken: string): Promise<User> {
-    const usersManager = this._getUsersManager();
-    const user = await usersManager.getInfo(accessToken);
+    const user = await this._getUserInfoByAccessToken(accessToken);
 
     const validateUser: Validate<typeof userSchema> = schemaValidatorBuilder(
       userSchema,
@@ -32,8 +35,17 @@ export class UserServiceImpl implements UserService {
     return user;
   }
 
+  private async _getUserInfoByAccessToken(accessToken: string) {
+    const cachedUser = await this._cacheManager.get<User>(accessToken);
+    if (!isNil(cachedUser)) return cachedUser;
+    const usersManager = this._getUsersManager();
+    const user = await usersManager.getInfo(accessToken);
+    await this._cacheManager.set(accessToken, user, 30 * 1000);
+    return user;
+  }
+
   private _getUsersManager() {
-    const usersManager = this._client.users;
+    const usersManager = this._auth0AuthenticationClient.users;
     if (isNil(usersManager)) throw new InternalServerError();
     return usersManager;
   }
