@@ -130,7 +130,6 @@ export class CreateServiceScheduleRequestBody
 }
 
 export class CreateCategoryRequestBody implements CreateCategoryServicePayload {
-  readonly itemIds: string[];
   readonly name: string;
   readonly serviceSchedule: CreateServiceScheduleRequestBody;
 }

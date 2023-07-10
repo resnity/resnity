@@ -21,7 +21,6 @@ export type CreatePriceServicePayload = CreatePricePayload;
 export type CreateImageServicePayload = CreateImagePayload;
 
 export type CreateCategoryServicePayload = {
-  itemIds: string[];
   name: string;
   serviceSchedule: CreateServiceScheduleServicePayload;
 };

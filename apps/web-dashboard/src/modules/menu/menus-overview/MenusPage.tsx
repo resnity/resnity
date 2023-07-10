@@ -1,4 +1,4 @@
-import Grid from '@mui/material/Unstable_Grid2';
+import { Unstable_Grid2 as Grid } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router';
 
@@ -9,11 +9,11 @@ import {
   useDeleteMenuById,
   useGetMenus,
 } from '../menu.queries';
-import { CreateMenuCard } from './CreateMenuCard';
 import { CreateMenuModal } from './CreateMenuModal';
-import { MenuOverviewCard } from './MenuOverviewCard';
+import { MenuCard } from './MenuCard';
+import { NewMenuCard } from './NewMenuCard';
 
-export const MenusOverviewPage = () => {
+export const MenusPage = () => {
   const { isOpen, open, close } = useModal();
 
   const navigate = useNavigate();
@@ -40,7 +40,7 @@ export const MenusOverviewPage = () => {
       <Grid container spacing={2} sx={{ width: '100%' }}>
         {menus?.map((menu) => (
           <Grid xs={12} md={6} xl={4}>
-            <MenuOverviewCard
+            <MenuCard
               key={menu.id}
               id={menu.id}
               name={menu.name}
@@ -51,7 +51,7 @@ export const MenusOverviewPage = () => {
           </Grid>
         ))}
         <Grid xs={12} md={6} xl={4}>
-          <CreateMenuCard onClick={open} />
+          <NewMenuCard onClick={open} />
         </Grid>
       </Grid>
       <CreateMenuModal isOpen={isOpen} onClose={close} />

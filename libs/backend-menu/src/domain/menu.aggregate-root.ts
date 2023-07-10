@@ -174,9 +174,9 @@ export class Menu extends AggregateRoot<MenuId> {
   private _addCategory(payload: CreateCategoryPayload) {
     const category = Category.create(payload);
 
-    if (!this._isCategoryExistsByName(category.name))
+    if (this._doesCategoryNameExist(category.name))
       throw DomainError.ofCode(MenuErrorCode.MENU_CATEGORY_NAME_ALREADY_EXISTS);
-    if (!this._areCategoryItemsExistInMenu(category.itemIds))
+    if (!this._doItemsExist(category.itemIds))
       throw DomainError.ofCode(MenuErrorCode.MENU_ITEM_NOT_FOUND);
 
     this._categories.push(category);
@@ -207,7 +207,7 @@ export class Menu extends AggregateRoot<MenuId> {
   private _addItem(payload: CreateItemPayload) {
     const item = Item.create(payload);
 
-    if (!this._isItemExistsByName(item.name))
+    if (!this._doesItemNameExist(item.name))
       throw DomainError.ofCode(MenuErrorCode.MENU_ITEM_NAME_ALREADY_EXISTS);
 
     this._items.push(item);
@@ -242,7 +242,7 @@ export class Menu extends AggregateRoot<MenuId> {
   private _addModifier(payload: CreateModifierPayload) {
     const modifier = Modifier.create(payload);
 
-    if (!this._isModifierExistsByName(payload.name))
+    if (!this._doesModifierNameExist(payload.name))
       throw DomainError.ofCode(MenuErrorCode.MENU_MODIFIER_NAME_ALREADY_EXISTS);
     // TODO: Extra validation
 
@@ -276,14 +276,6 @@ export class Menu extends AggregateRoot<MenuId> {
     this._modifiers.splice(indexToRemove, 1);
   }
 
-  private _areCategoryItemsExistInMenu(itemIds: ItemId[]) {
-    return itemIds.some((itemId) => this._isCategoryItemExistsInMenu(itemId));
-  }
-
-  private _isCategoryItemExistsInMenu(itemId: ItemId) {
-    return this._isItemExistsById(itemId);
-  }
-
   private _getCategoryById(categoryId: CategoryId) {
     return this._categories.find((category) => category.id === categoryId);
   }
@@ -296,23 +288,19 @@ export class Menu extends AggregateRoot<MenuId> {
     return this._modifiers.find((modifier) => modifier.id === modifierId);
   }
 
-  private _isItemExistsById(itemId: ItemId) {
-    return this._items.some((item) => item.id === itemId);
+  private _doItemsExist(itemIds: ItemId[]) {
+    return this._items.every((item) => itemIds.includes(item.id));
   }
 
-  private _isModifierExistsById(modifierId: ModifierId) {
-    return this._modifiers.some((modifier) => modifier.id === modifierId);
-  }
-
-  private _isCategoryExistsByName(name: string) {
+  private _doesCategoryNameExist(name: string) {
     return this._categories.some((category) => category.name === name);
   }
 
-  private _isItemExistsByName(name: string) {
+  private _doesItemNameExist(name: string) {
     return this._items.some((item) => item.name === name);
   }
 
-  private _isModifierExistsByName(name: string) {
+  private _doesModifierNameExist(name: string) {
     return this._modifiers.some((modifier) => modifier.name === name);
   }
 

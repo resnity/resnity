@@ -27,6 +27,7 @@ export const MENU_SERVICES_TOKEN = Symbol('MENU_SERVICES_TOKEN');
 
 export interface MenuService {
   getMenus(): Promise<Menu[]>;
+  getMenuById(menuId: string): Promise<Menu>;
   createMenu(payload: CreateMenuServicePayload): Promise<string>;
   updateMenuById(
     menuId: string,
@@ -79,6 +80,10 @@ export class MenuServiceImpl implements MenuService {
     return this._repository.findMany();
   }
 
+  async getMenuById(menuId: string) {
+    return this._getMenuById(menuId);
+  }
+
   async createMenu(payload: CreateMenuServicePayload) {
     const menu = withTransformUnknownErrorToAppError(() =>
       Menu.create({
@@ -121,7 +126,10 @@ export class MenuServiceImpl implements MenuService {
   async createCategory(menuId: string, payload: CreateCategoryServicePayload) {
     const menu = await this._getMenuById(menuId);
     const categoryId = withTransformUnknownErrorToAppError(() =>
-      menu.addCategory(payload),
+      menu.addCategory({
+        itemIds: [],
+        ...payload,
+      }),
     );
 
     await this._repository.withTransaction(async () => {

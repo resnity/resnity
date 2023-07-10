@@ -5,7 +5,7 @@ import { LoginPage, LogoutPage } from '@resnity/web-auth';
 import { DashboardLayout } from './components/DashboardLayout';
 import { NoPermissionPage } from './components/NoPermissionPage';
 import { MenuDetailsPage } from './modules/menu/menu-details-page/MenuDetailsPage';
-import { MenusOverviewPage } from './modules/menu/menus-overview/MenusOverviewPage';
+import { MenusPage } from './modules/menu/menus-overview/MenusPage';
 import { RedirectSetupRestaurantPage } from './modules/restaurant/components/RedirectSetupRestaurantPage';
 import { DashboardProvider } from './providers/dashboard.provider';
 
@@ -27,7 +27,7 @@ export const RootRoutes = () => {
           </DashboardProvider>
         }
       >
-        <Route path="menus" element={<MenusOverviewPage />} />
+        <Route path="menus" element={<MenusPage />} />
         <Route path="menus/:menuId" element={<MenuDetailsPage />} />
       </Route>
     </Routes>

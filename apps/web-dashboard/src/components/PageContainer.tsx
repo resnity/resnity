@@ -1,5 +1,11 @@
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { Grid, IconButton, Skeleton, Stack, Typography } from '@mui/material';
+import {
+  Unstable_Grid2 as Grid,
+  IconButton,
+  Skeleton,
+  Stack,
+  Typography,
+} from '@mui/material';
 import { PropsWithChildren } from 'react';
 import { useNavigate } from 'react-router';
 
