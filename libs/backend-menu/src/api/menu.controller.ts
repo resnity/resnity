@@ -1,5 +1,7 @@
+import { CacheKey } from '@nestjs/cache-manager';
 import {
   Body,
+  CacheTTL,
   Controller,
   Delete,
   Get,
@@ -9,12 +11,16 @@ import {
   Post,
 } from '@nestjs/common';
 
-import { HttpResponse } from '@resnity/backend-common';
-
+import { Auth, Permission } from '@resnity/backend-auth';
 import {
-  MENU_SERVICES_TOKEN,
-  MenuServices,
-} from '../application/menu.services';
+  APP_CLS_TENANT_ID,
+  AppClsService,
+  HttpResponse,
+  UnauthorizedError,
+} from '@resnity/backend-common';
+import { isNil } from '@resnity/web-common';
+
+import { MENU_SERVICES_TOKEN, MenuService } from '../application/menu.service';
 import { MENU_MAPPER_TOKEN, MenuMapper } from '../infrastructure/menu.mapper';
 import {
   CreateCategoryRequestBody,
@@ -30,37 +36,46 @@ import {
 @Controller('menus')
 export class MenuController {
   constructor(
+    private readonly _appClsService: AppClsService,
     @Inject(MENU_SERVICES_TOKEN)
-    private readonly _services: MenuServices,
+    private readonly _menuService: MenuService,
     @Inject(MENU_MAPPER_TOKEN)
     private readonly _mapper: MenuMapper,
   ) {}
 
+  @Auth({ requiredPermissions: [Permission.READ_RESTAURANT_MENUS] })
   @Get()
   async getMenus() {
-    const menus = await this._services.getMenus();
+    const menus = await this._menuService.getMenus();
     const dtos = this._mapper.toResponseDtos(menus);
     return HttpResponse.ok(dtos);
   }
 
+  @Auth({ requiredPermissions: [Permission.WRITE_RESTAURANT_MENUS] })
   @Post()
   async createMenu(@Body() body: CreateMenuRequestBody) {
-    const menuId = await this._services.createMenu(body);
+    const restaurantId = this._getCurrentRestaurantId();
+    const menuId = await this._menuService.createMenu({
+      restaurantId,
+      ...body,
+    });
     return HttpResponse.ok({ id: menuId });
   }
 
+  @Auth({ requiredPermissions: [Permission.WRITE_RESTAURANT_MENUS] })
   @Patch(':menuId')
   async updateMenuById(
     @Param('menuId') menuId: string,
     @Body() body: UpdateMenuRequestBody,
   ) {
-    await this._services.updateMenuById(menuId, body);
+    await this._menuService.updateMenuById(menuId, body);
     return HttpResponse.ok({ id: menuId });
   }
 
+  @Auth({ requiredPermissions: [Permission.WRITE_RESTAURANT_MENUS] })
   @Delete(':menuId')
   async removeMenuById(@Param('menuId') menuId: string) {
-    await this._services.removeMenuById(menuId);
+    await this._menuService.removeMenuById(menuId);
     return HttpResponse.ok({ id: menuId });
   }
 
@@ -69,7 +84,7 @@ export class MenuController {
     @Param('menuId') menuId: string,
     @Body() body: CreateCategoryRequestBody,
   ) {
-    const categoryId = await this._services.createCategory(menuId, body);
+    const categoryId = await this._menuService.createCategory(menuId, body);
     return HttpResponse.ok({ id: categoryId });
   }
 
@@ -79,7 +94,7 @@ export class MenuController {
     @Param('categoryId') categoryId: string,
     @Body() body: UpdateCategoryRequestBody,
   ) {
-    await this._services.updateCategoryById(menuId, categoryId, body);
+    await this._menuService.updateCategoryById(menuId, categoryId, body);
     return HttpResponse.ok({ id: categoryId });
   }
 
@@ -88,7 +103,7 @@ export class MenuController {
     @Param('menuId') menuId: string,
     @Param('categoryId') categoryId: string,
   ) {
-    await this._services.removeCategoryById(menuId, categoryId);
+    await this._menuService.removeCategoryById(menuId, categoryId);
     return HttpResponse.ok({ id: categoryId });
   }
 
@@ -97,7 +112,7 @@ export class MenuController {
     @Param('menuId') menuId: string,
     @Body() body: CreateItemRequestBody,
   ) {
-    const itemId = await this._services.createItem(menuId, body);
+    const itemId = await this._menuService.createItem(menuId, body);
     return HttpResponse.ok({ id: itemId });
   }
 
@@ -107,7 +122,7 @@ export class MenuController {
     @Param('itemId') itemId: string,
     @Body() body: UpdateItemRequestBody,
   ) {
-    await this._services.updateItemById(menuId, itemId, body);
+    await this._menuService.updateItemById(menuId, itemId, body);
     return HttpResponse.ok({ id: itemId });
   }
 
@@ -116,7 +131,7 @@ export class MenuController {
     @Param('menuId') menuId: string,
     @Param('itemId') itemId: string,
   ) {
-    await this._services.removeItemById(menuId, itemId);
+    await this._menuService.removeItemById(menuId, itemId);
     return HttpResponse.ok({ id: itemId });
   }
 
@@ -125,7 +140,7 @@ export class MenuController {
     @Param('menuId') menuId: string,
     @Body() body: CreateModifierRequestBody,
   ) {
-    const modifierId = await this._services.createModifier(menuId, body);
+    const modifierId = await this._menuService.createModifier(menuId, body);
     return HttpResponse.ok({ id: modifierId });
   }
 
@@ -135,7 +150,7 @@ export class MenuController {
     @Param('modifierId') modifierId: string,
     @Body() body: UpdateModifierRequestBody,
   ) {
-    await this._services.updateModifierById(menuId, modifierId, body);
+    await this._menuService.updateModifierById(menuId, modifierId, body);
     return HttpResponse.ok({ id: modifierId });
   }
 
@@ -144,7 +159,13 @@ export class MenuController {
     @Param('menuId') menuId: string,
     @Param('modifierId') modifierId: string,
   ) {
-    await this._services.removeModifierById(menuId, modifierId);
+    await this._menuService.removeModifierById(menuId, modifierId);
     return HttpResponse.ok({ id: modifierId });
+  }
+
+  private _getCurrentRestaurantId() {
+    const restaurantId = this._appClsService.get(APP_CLS_TENANT_ID);
+    if (isNil(restaurantId)) throw new UnauthorizedError();
+    return restaurantId;
   }
 }

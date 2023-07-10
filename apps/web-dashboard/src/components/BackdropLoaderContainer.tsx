@@ -13,7 +13,7 @@ export const BackdropLoaderContainer = ({
     <>
       {children}
       <Backdrop
-        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.snackbar + 1 }}
         open={isLoading}
       >
         <CircularProgress color="inherit" />

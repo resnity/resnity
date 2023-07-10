@@ -1,9 +1,8 @@
 import BorderColorIcon from '@mui/icons-material/BorderColor';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import LogoutIcon from '@mui/icons-material/Logout';
-import MenuIcon from '@mui/icons-material/Menu';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
+import SegmentIcon from '@mui/icons-material/Segment';
 import {
   Avatar,
   Box,
@@ -58,6 +57,9 @@ export const DashboardLayout = () => {
           px: 3,
           position: 'fixed',
           height: theme.mixins.toolbar,
+          background: theme.palette.background.default,
+          zIndex: theme.zIndex.appBar,
+          borderBottom: `1px ${theme.palette.divider}`,
         }}
       >
         <Stack direction="row" alignItems="center" spacing={1}>
@@ -67,7 +69,7 @@ export const DashboardLayout = () => {
             color="inherit"
             onClick={toggle}
           >
-            {isOpen ? <ChevronLeftIcon /> : <MenuIcon />}
+            <SegmentIcon />
           </IconButton>
           <Typography variant="h6" component="div">
             RESNITY
@@ -115,11 +117,7 @@ export const DashboardLayout = () => {
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
-            <ListItemButton
-              onClick={() =>
-                logout({ logoutParams: { returnTo: window.location.origin } })
-              }
-            >
+            <ListItemButton onClick={() => logout()}>
               <ListItemIcon>
                 <LogoutIcon />
               </ListItemIcon>

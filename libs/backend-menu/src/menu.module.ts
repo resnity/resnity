@@ -1,5 +1,6 @@
 import { Module, Provider } from '@nestjs/common';
 
+import { AuthModule } from '@resnity/backend-auth';
 import {
   AppClsModule,
   AppClsService,
@@ -14,8 +15,8 @@ import {
 import { MenuController } from './api/menu.controller';
 import {
   MENU_SERVICES_TOKEN,
-  MenuServicesImpl,
-} from './application/menu.services';
+  MenuServiceImpl,
+} from './application/menu.service';
 import {
   MENU_MAPPER_TOKEN,
   MenuMapper,
@@ -53,11 +54,11 @@ const repositoryProvider: Provider = {
 
 const servicesProvider: Provider = {
   provide: MENU_SERVICES_TOKEN,
-  useClass: MenuServicesImpl,
+  useClass: MenuServiceImpl,
 };
 
 @Module({
-  imports: [AppClsModule, MapperModule],
+  imports: [AppClsModule, AuthModule, MapperModule],
   controllers: [MenuController],
   providers: [mapperProvider, repositoryProvider, servicesProvider],
 })

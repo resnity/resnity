@@ -14,7 +14,6 @@ export const RedirectSetupRestaurantPage = () => {
       didInitialize.current = true;
       return;
     }
-    if (isSuccess) return;
     mutate();
   }, [isSuccess, mutate]);
 
