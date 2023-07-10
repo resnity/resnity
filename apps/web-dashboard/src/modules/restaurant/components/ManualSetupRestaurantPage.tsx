@@ -13,7 +13,7 @@ import {
 } from '../restaurant.forms';
 import { useCreateRestaurant } from '../restaurant.queries';
 
-export const SetupRestaurantPage = () => {
+export const ManualSetupRestaurantPage = () => {
   const navigate = useNavigate();
 
   const { control, handleSubmit: withFormHandler } =

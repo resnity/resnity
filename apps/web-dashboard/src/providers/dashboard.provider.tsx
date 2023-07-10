@@ -5,8 +5,8 @@ import { useNavigate } from 'react-router';
 import { useAuth } from '@resnity/web-auth';
 
 import { FullScreenLoader } from '../components/FullScreenLoader';
-import { isForbiddenStatus } from '../libs/axios';
-import { useGetRestaurants } from '../modules/restaurant/restaurant.queries';
+import { isForbiddenStatus, isNotFoundStatus } from '../libs/axios';
+import { useCurrentGetRestaurants } from '../modules/restaurant/restaurant.queries';
 import { RestaurantProvider } from './restaurant.provider';
 
 export const DashboardProvider = ({ children }: PropsWithChildren) => {
@@ -21,10 +21,10 @@ export const DashboardProvider = ({ children }: PropsWithChildren) => {
   const {
     data,
     error,
-    isLoading: isGetRestaurantsLoading,
+    isLoading: isGetCurrentRestaurantLoading,
     isSuccess,
     isError,
-  } = useGetRestaurants({
+  } = useCurrentGetRestaurants({
     enabled: isAuthenticated,
   });
 
@@ -33,19 +33,20 @@ export const DashboardProvider = ({ children }: PropsWithChildren) => {
   }, [isAuthenticated, isAuthLoading, loginWithRedirect]);
 
   useLayoutEffect(() => {
-    if (isSuccess && data.length === 0) navigate('/setup-restaurant');
-  }, [data, isSuccess, navigate]);
+    if (!isError) return;
 
-  useLayoutEffect(() => {
-    if (isError && isAxiosError(error) && isForbiddenStatus(error))
+    if (isAxiosError(error) && isForbiddenStatus(error))
       navigate('/no-permission');
+    else if (isAxiosError(error) && isNotFoundStatus(error))
+      navigate('/restaurants/initial-setup');
   }, [error, isError, navigate]);
 
-  if (isAuthLoading || isGetRestaurantsLoading) return <FullScreenLoader />;
+  if (isAuthLoading || isGetCurrentRestaurantLoading)
+    return <FullScreenLoader />;
 
   if (isSuccess)
     return (
-      <RestaurantProvider value={{ restaurant: data[0] }}>
+      <RestaurantProvider value={{ restaurant: data }}>
         {children}
       </RestaurantProvider>
     );
