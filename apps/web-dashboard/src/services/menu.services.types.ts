@@ -32,7 +32,7 @@ type CategoryResponseDto = {
   serviceSchedule: ServiceScheduleResponseDto;
 };
 
-type ItemResponseDto = {
+export type ItemResponseDto = {
   id: string;
   createdAt: string;
   updatedAt: string;
@@ -65,6 +65,10 @@ export type MenuResponseDto = {
   modifiers: ModifierResponseDto[];
 };
 
+export type WithMenuId<T> = {
+  menuId: string;
+} & T;
+
 export type CreateMenuRequestDto = {
   name: string;
 };
@@ -73,4 +77,27 @@ export type CreateMenuResponseDto = {
   id: string;
 };
 
-export type DeleteMenuByIdParam = string;
+export type CreateTimePeriodRequestDto = {
+  startTime: string;
+  endTime: string;
+};
+
+export type CreateServiceScheduleRequestDto = {
+  name: string;
+  monday: CreateTimePeriodRequestDto;
+  tuesday: CreateTimePeriodRequestDto;
+  wednesday: CreateTimePeriodRequestDto;
+  thursday: CreateTimePeriodRequestDto;
+  friday: CreateTimePeriodRequestDto;
+  saturday: CreateTimePeriodRequestDto;
+  sunday: CreateTimePeriodRequestDto;
+};
+
+export type CreateCategoryRequestDto = {
+  name: string;
+  serviceSchedule: CreateServiceScheduleRequestDto;
+};
+
+export type CreateCategoryResponseDto = {
+  id: string;
+};

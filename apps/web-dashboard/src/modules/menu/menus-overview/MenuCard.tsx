@@ -1,8 +1,8 @@
-import { Box, Button, Stack, Typography } from '@mui/material';
+import { Button, Stack, Typography } from '@mui/material';
 
 import { SquarePaper } from '../../../components/SquarePaper';
 
-type MenuOverviewCardProps = {
+type MenuCardProps = {
   id: string;
   name: string;
   createdAt: string;
@@ -10,13 +10,13 @@ type MenuOverviewCardProps = {
   onDeleteButtonClick: (menuId: string) => void;
 };
 
-export const MenuOverviewCard = ({
+export const MenuCard = ({
   id,
   name,
   createdAt,
   onViewDetailsButtonClick: onEdit,
   onDeleteButtonClick: onDelete,
-}: MenuOverviewCardProps) => {
+}: MenuCardProps) => {
   return (
     <SquarePaper>
       <Stack

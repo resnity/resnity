@@ -84,7 +84,7 @@ export class Category extends Entity<CategoryId> {
     this._itemIds.splice(indexToRemove, 1);
   }
 
-  @AutoMap()
+  @AutoMap(() => String)
   get name(): CategoryName {
     return this._name;
   }
@@ -92,7 +92,7 @@ export class Category extends Entity<CategoryId> {
     this._name = value;
   }
 
-  @AutoMap()
+  @AutoMap(() => [String])
   get itemIds(): ItemId[] {
     return this._itemIds;
   }
@@ -100,7 +100,7 @@ export class Category extends Entity<CategoryId> {
     this._itemIds = value;
   }
 
-  @AutoMap()
+  @AutoMap(() => ServiceSchedule)
   get serviceSchedule(): ServiceSchedule {
     return this._serviceSchedule;
   }

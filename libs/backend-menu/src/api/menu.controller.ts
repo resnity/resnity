@@ -1,7 +1,5 @@
-import { CacheKey } from '@nestjs/cache-manager';
 import {
   Body,
-  CacheTTL,
   Controller,
   Delete,
   Get,
@@ -62,6 +60,14 @@ export class MenuController {
     return HttpResponse.ok({ id: menuId });
   }
 
+  @Auth({ requiredPermissions: [Permission.READ_RESTAURANT_MENUS] })
+  @Get(':menuId')
+  async getMenuById(@Param('menuId') menuId: string) {
+    const menu = await this._menuService.getMenuById(menuId);
+    const dto = this._mapper.toResponseDto(menu);
+    return HttpResponse.ok(dto);
+  }
+
   @Auth({ requiredPermissions: [Permission.WRITE_RESTAURANT_MENUS] })
   @Patch(':menuId')
   async updateMenuById(
@@ -79,6 +85,7 @@ export class MenuController {
     return HttpResponse.ok({ id: menuId });
   }
 
+  @Auth({ requiredPermissions: [Permission.WRITE_RESTAURANT_MENUS] })
   @Post(':menuId/categories')
   async createCategory(
     @Param('menuId') menuId: string,
@@ -88,6 +95,7 @@ export class MenuController {
     return HttpResponse.ok({ id: categoryId });
   }
 
+  @Auth({ requiredPermissions: [Permission.WRITE_RESTAURANT_MENUS] })
   @Patch(':menuId/categories/:categoryId')
   async updateCategoryById(
     @Param('menuId') menuId: string,
@@ -98,6 +106,7 @@ export class MenuController {
     return HttpResponse.ok({ id: categoryId });
   }
 
+  @Auth({ requiredPermissions: [Permission.WRITE_RESTAURANT_MENUS] })
   @Delete(':menuId/categories/:categoryId')
   async removeCategoryById(
     @Param('menuId') menuId: string,
@@ -107,6 +116,7 @@ export class MenuController {
     return HttpResponse.ok({ id: categoryId });
   }
 
+  @Auth({ requiredPermissions: [Permission.WRITE_RESTAURANT_MENUS] })
   @Post(':menuId/items')
   async createItem(
     @Param('menuId') menuId: string,
@@ -116,6 +126,7 @@ export class MenuController {
     return HttpResponse.ok({ id: itemId });
   }
 
+  @Auth({ requiredPermissions: [Permission.WRITE_RESTAURANT_MENUS] })
   @Patch(':menuId/items/:itemId')
   async updateItemById(
     @Param('menuId') menuId: string,
@@ -126,6 +137,7 @@ export class MenuController {
     return HttpResponse.ok({ id: itemId });
   }
 
+  @Auth({ requiredPermissions: [Permission.WRITE_RESTAURANT_MENUS] })
   @Delete(':menuId/items/:itemId')
   async removeItemById(
     @Param('menuId') menuId: string,
@@ -135,6 +147,7 @@ export class MenuController {
     return HttpResponse.ok({ id: itemId });
   }
 
+  @Auth({ requiredPermissions: [Permission.WRITE_RESTAURANT_MENUS] })
   @Post(':menuId/modifiers')
   async createModifier(
     @Param('menuId') menuId: string,
@@ -144,6 +157,7 @@ export class MenuController {
     return HttpResponse.ok({ id: modifierId });
   }
 
+  @Auth({ requiredPermissions: [Permission.WRITE_RESTAURANT_MENUS] })
   @Patch(':menuId/modifiers/:modifierId')
   async updateModifierById(
     @Param('menuId') menuId: string,
@@ -154,6 +168,7 @@ export class MenuController {
     return HttpResponse.ok({ id: modifierId });
   }
 
+  @Auth({ requiredPermissions: [Permission.WRITE_RESTAURANT_MENUS] })
   @Delete(':menuId/modifiers/:modifierId')
   async removeModifierById(
     @Param('menuId') menuId: string,
