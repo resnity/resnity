@@ -1,8 +1,8 @@
 import { AutoMap } from '@automapper/classes';
-import { createId, isCuid } from '@paralleldrive/cuid2';
+import { createId } from '@paralleldrive/cuid2';
 import { z } from 'zod';
 
-export const EntityId = z.string().refine((value) => isCuid(value));
+export const EntityId = z.string();
 export type EntityId = z.infer<typeof EntityId>;
 
 export const createEntityId = () => EntityId.parse(createId());

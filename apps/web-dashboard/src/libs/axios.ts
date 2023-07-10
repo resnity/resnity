@@ -109,6 +109,9 @@ export const axiosWithAuth = {
     ),
 };
 
+export const isNotFoundStatus = (error: AxiosError) =>
+  error.response && error.response.status === HttpStatusCode.NotFound;
+
 export const isUnauthorizedStatus = (error: AxiosError) =>
   error.response && error.response.status === HttpStatusCode.Unauthorized;
 

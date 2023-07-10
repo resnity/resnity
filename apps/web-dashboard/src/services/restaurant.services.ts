@@ -14,6 +14,14 @@ export const getRestaurants = async () =>
     BASE_PATH,
   );
 
+export const getCurrentRestaurant = async () =>
+  await axiosWithAuth.get<SuccessHttpResponse<RestaurantResponseDto>>(
+    `${BASE_PATH}/current`,
+  );
+
+export const setupRestaurant = async () =>
+  await axiosWithAuth.post(`${BASE_PATH}/setup`, {});
+
 export const createRestaurant = async (data: CreateRestaurantRequestDto) =>
   await axiosWithAuth.post<SuccessHttpResponse<CreateRestaurantResponseDto>>(
     BASE_PATH,

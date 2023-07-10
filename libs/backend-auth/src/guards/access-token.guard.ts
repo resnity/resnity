@@ -46,8 +46,6 @@ export class AccessTokenGuard implements CanActivate {
         user.org_id,
       );
 
-      console.log(organization);
-
       user.permissions = jwtPayload.permissions;
 
       this._appClsService.set(APP_CLS_TENANT_ID, user.org_id);

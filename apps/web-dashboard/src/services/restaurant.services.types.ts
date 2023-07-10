@@ -1,3 +1,7 @@
+export type SetupRestaurantResponseDto = {
+  id: string;
+};
+
 export type CreateRestaurantRequestDto = {
   name: string;
 };
