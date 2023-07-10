@@ -4,33 +4,31 @@ import {
   AggregateRoot,
   BaseEntityPayload,
   DomainError,
+  MaybeBaseEntityPayload,
   createEntityId,
   isNil,
 } from '@resnity/backend-common';
 
+import { Store } from './entities/store.entity';
 import {
-  MenuId,
-  assertMenuIdValid,
-  assertMenuIdsValid,
-} from './common/menu.types';
-import { Outlet } from './entity/outlet.entity';
-import {
-  CreateOutletPayload,
-  OutletId,
-  UpdateOutletPayload,
-  assertOutletIdValid,
-} from './entity/outlet.entity.types';
+  CreateStorePayload,
+  StoreId,
+  UpdateStorePayload,
+  assertStoreIdValid,
+} from './entities/store.entity.types';
 import {
   CreateTablePayload,
   TableId,
   UpdateTablePayload,
   assertTableIdValid,
-} from './entity/table.entity.types';
+} from './entities/table.entity.types';
 import {
   CreateRestaurantPayload,
+  RestaurantDisplayName,
   RestaurantId,
   RestaurantName,
   UpdateRestaurantPayload,
+  assertMaybeRestaurantDisplayNameValid,
   assertRestaurantIdValid,
   assertRestaurantNameValid,
 } from './restaurant.aggregate-root.types';
@@ -39,15 +37,21 @@ import {
   RestaurantCreatedEvent,
   RestaurantRemovedEvent,
 } from './restaurant.events';
+import {
+  MenuId,
+  assertMenuIdValid,
+  assertMenuIdsValid,
+} from './shared/menu.types';
 
 export class Restaurant extends AggregateRoot<RestaurantId> {
   private _menuIds: MenuId[];
   private _name: RestaurantName;
-  private _outlets: Outlet[];
+  private _displayName?: RestaurantDisplayName;
+  private _stores: Store[];
 
-  static create(payload: CreateRestaurantPayload) {
+  static create(payload: MaybeBaseEntityPayload<CreateRestaurantPayload>) {
     const restaurant = Restaurant.new({
-      id: createEntityId(),
+      id: payload.id ?? createEntityId(),
       createdAt: new Date(),
       updatedAt: new Date(),
       ...payload,
@@ -66,6 +70,7 @@ export class Restaurant extends AggregateRoot<RestaurantId> {
   static new(payload: BaseEntityPayload<CreateRestaurantPayload>) {
     assertRestaurantIdValid(payload.id);
     assertRestaurantNameValid(payload.name);
+    assertMaybeRestaurantDisplayNameValid(payload.displayName);
     assertMenuIdsValid(payload.menuIds);
 
     const restaurant = new Restaurant();
@@ -73,19 +78,24 @@ export class Restaurant extends AggregateRoot<RestaurantId> {
     restaurant.createdAt = payload.createdAt;
     restaurant.updatedAt = payload.updatedAt;
     restaurant.name = payload.name;
+    restaurant.displayName = payload.displayName;
     restaurant.menuIds = payload.menuIds;
-    restaurant.outlets = payload.outlets.map(Outlet.create);
+    restaurant.stores = payload.stores.map(Store.create);
     return restaurant;
   }
 
   update(payload: UpdateRestaurantPayload) {
-    if (payload.menuIds !== undefined) {
+    if (!isNil(payload.menuIds)) {
       assertMenuIdsValid(payload.menuIds);
       this._menuIds = payload.menuIds;
     }
-    if (payload.name !== undefined) {
+    if (!isNil(payload.name)) {
       assertRestaurantNameValid(payload.name);
       this._name = payload.name;
+    }
+    if (!isNil(payload.displayName)) {
+      assertMaybeRestaurantDisplayNameValid(payload.displayName);
+      this._displayName = payload.displayName;
     }
     this._setUpdatedAtToNow();
   }
@@ -101,46 +111,46 @@ export class Restaurant extends AggregateRoot<RestaurantId> {
     this._setUpdatedAtToNow();
   }
 
-  addOutlet(payload: CreateOutletPayload) {
-    const outlet = Outlet.create(payload);
-    this._outlets.push(outlet);
+  addStore(payload: CreateStorePayload) {
+    const store = Store.create(payload);
+    this._stores.push(store);
     this._setUpdatedAtToNow();
-    return outlet.id;
+    return store.id;
   }
 
-  updateOutletById(outletId: string, payload: UpdateOutletPayload) {
-    assertOutletIdValid(outletId);
-    this._updateOutletById(outletId, payload);
-    this._setUpdatedAtToNow();
-  }
-
-  removeOutletById(outletId: string) {
-    assertOutletIdValid(outletId);
-    this._removeOutletById(outletId);
+  updateStoreById(storeId: string, payload: UpdateStorePayload) {
+    assertStoreIdValid(storeId);
+    this._updateStoreById(storeId, payload);
     this._setUpdatedAtToNow();
   }
 
-  addTable(outletId: string, payload: CreateTablePayload) {
-    assertOutletIdValid(outletId);
-    const tableId = this._addTable(outletId, payload);
+  removeStoreById(storeId: string) {
+    assertStoreIdValid(storeId);
+    this._removeStoreById(storeId);
+    this._setUpdatedAtToNow();
+  }
+
+  addTable(storeId: string, payload: CreateTablePayload) {
+    assertStoreIdValid(storeId);
+    const tableId = this._addTable(storeId, payload);
     this._setUpdatedAtToNow();
     return tableId;
   }
 
   updateTableById(
-    outletId: string,
+    storeId: string,
     tableId: string,
     payload: UpdateTablePayload,
   ) {
-    assertOutletIdValid(outletId);
+    assertStoreIdValid(storeId);
     assertTableIdValid(tableId);
-    this._updateTableById(outletId, tableId, payload);
+    this._updateTableById(storeId, tableId, payload);
     this._setUpdatedAtToNow();
   }
 
-  removeTableById(outletId: string, tableId: string) {
-    assertOutletIdValid(outletId);
-    this._removeTableById(outletId, tableId);
+  removeTableById(storeId: string, tableId: string) {
+    assertStoreIdValid(storeId);
+    this._removeTableById(storeId, tableId);
     this._setUpdatedAtToNow();
   }
 
@@ -152,51 +162,51 @@ export class Restaurant extends AggregateRoot<RestaurantId> {
     this._menuIds.push(menuId);
   }
 
-  private _updateOutletById(outletId: OutletId, payload: UpdateOutletPayload) {
-    const outlet = this._getOutletById(outletId);
-    if (isNil(outlet))
-      throw DomainError.ofCode(RestaurantErrorCode.RESTAURANT_OUTLET_NOT_FOUND);
-    outlet.update(payload);
+  private _updateStoreById(storeId: StoreId, payload: UpdateStorePayload) {
+    const store = this._getStoreById(storeId);
+    if (isNil(store))
+      throw DomainError.ofCode(RestaurantErrorCode.RESTAURANT_STORE_NOT_FOUND);
+    store.update(payload);
   }
 
-  private _removeOutletById(outletId: OutletId) {
-    const outlet = this._getOutletById(outletId);
-    if (isNil(outlet))
-      throw DomainError.ofCode(RestaurantErrorCode.RESTAURANT_OUTLET_NOT_FOUND);
+  private _removeStoreById(storeId: StoreId) {
+    const store = this._getStoreById(storeId);
+    if (isNil(store))
+      throw DomainError.ofCode(RestaurantErrorCode.RESTAURANT_STORE_NOT_FOUND);
 
-    const indexToRemove = this._outlets.findIndex(
-      (outlet) => outlet.id === outletId,
+    const indexToRemove = this._stores.findIndex(
+      (store) => store.id === storeId,
     );
-    this._outlets.splice(indexToRemove, 1);
+    this._stores.splice(indexToRemove, 1);
   }
 
-  private _addTable(outletId: OutletId, payload: CreateTablePayload) {
-    const outlet = this._getOutletById(outletId);
-    if (isNil(outlet))
-      throw DomainError.ofCode(RestaurantErrorCode.RESTAURANT_OUTLET_NOT_FOUND);
-    return outlet.addTable(payload);
+  private _addTable(storeId: StoreId, payload: CreateTablePayload) {
+    const store = this._getStoreById(storeId);
+    if (isNil(store))
+      throw DomainError.ofCode(RestaurantErrorCode.RESTAURANT_STORE_NOT_FOUND);
+    return store.addTable(payload);
   }
 
   private _updateTableById(
-    outletId: OutletId,
+    storeId: StoreId,
     tableId: TableId,
     payload: UpdateTablePayload,
   ) {
-    const outlet = this._getOutletById(outletId);
-    if (isNil(outlet))
-      throw DomainError.ofCode(RestaurantErrorCode.RESTAURANT_OUTLET_NOT_FOUND);
-    outlet.updateTableById(tableId, payload);
+    const store = this._getStoreById(storeId);
+    if (isNil(store))
+      throw DomainError.ofCode(RestaurantErrorCode.RESTAURANT_STORE_NOT_FOUND);
+    store.updateTableById(tableId, payload);
   }
 
-  private _removeTableById(outletId: OutletId, tableId: string) {
-    const outlet = this._getOutletById(outletId);
-    if (isNil(outlet))
-      throw DomainError.ofCode(RestaurantErrorCode.RESTAURANT_OUTLET_NOT_FOUND);
-    outlet.removeTableById(tableId);
+  private _removeTableById(storeId: StoreId, tableId: string) {
+    const store = this._getStoreById(storeId);
+    if (isNil(store))
+      throw DomainError.ofCode(RestaurantErrorCode.RESTAURANT_STORE_NOT_FOUND);
+    store.removeTableById(tableId);
   }
 
-  private _getOutletById(outletId: OutletId) {
-    return this._outlets.find((outlet) => outlet.id === outletId);
+  private _getStoreById(storeId: StoreId) {
+    return this._stores.find((store) => store.id === storeId);
   }
 
   @AutoMap(() => [String])
@@ -215,11 +225,19 @@ export class Restaurant extends AggregateRoot<RestaurantId> {
     this._name = value;
   }
 
-  @AutoMap(() => [Outlet])
-  get outlets(): Outlet[] {
-    return this._outlets;
+  @AutoMap(() => String)
+  get displayName(): RestaurantDisplayName | undefined {
+    return this._displayName;
   }
-  set outlets(value: Outlet[]) {
-    this._outlets = value;
+  set displayName(value: RestaurantDisplayName | undefined) {
+    this._displayName = value;
+  }
+
+  @AutoMap(() => [Store])
+  get stores(): Store[] {
+    return this._stores;
+  }
+  set stores(value: Store[]) {
+    this._stores = value;
   }
 }

@@ -4,13 +4,13 @@ import { EmbeddedResponseDto, ResponseDto } from '@resnity/backend-common';
 
 import {
   CreateAddressServicePayload,
-  CreateOutletServicePayload,
   CreateRestaurantServicePayload,
   CreateServiceScheduleServicePayload,
+  CreateStoreServicePayload,
   CreateTableServicePayload,
   CreateTimePeriodServicePayload,
-  UpdateOutletServicePayload,
   UpdateRestaurantServicePayload,
+  UpdateStoreServicePayload,
   UpdateTableServicePayload,
 } from '../application/restaurant.services.types';
 
@@ -71,7 +71,7 @@ export class TableResponseDto extends ResponseDto {
   readonly capacity: number;
 }
 
-export class OutletResponseDto extends ResponseDto {
+export class StoreResponseDto extends ResponseDto {
   @AutoMap(() => [String])
   readonly menuIds: string[];
   @AutoMap(() => [String])
@@ -93,14 +93,17 @@ export class RestaurantResponseDto extends ResponseDto {
   readonly menuIds: string[];
   @AutoMap()
   readonly name: string;
-  @AutoMap(() => [OutletResponseDto])
-  readonly outlets: OutletResponseDto[];
+  @AutoMap()
+  readonly displayName?: string;
+  @AutoMap(() => [StoreResponseDto])
+  readonly stores: StoreResponseDto[];
 }
 
 export class CreateRestaurantRequestBody
   implements CreateRestaurantServicePayload
 {
   readonly name: string;
+  readonly displayName?: string;
 }
 
 export class UpdateRestaurantRequestBody
@@ -108,6 +111,7 @@ export class UpdateRestaurantRequestBody
 {
   readonly menuIds?: string[];
   readonly name?: string;
+  readonly displayName?: string;
 }
 
 export class CreateAddressRequestBody implements CreateAddressServicePayload {
@@ -145,7 +149,7 @@ export class CreateServiceScheduleRequestBody
   readonly sunday: CreateTimePeriodRequestBody;
 }
 
-export class CreateOutletRequestBody implements CreateOutletServicePayload {
+export class CreateStoreRequestBody implements CreateStoreServicePayload {
   readonly menuIds: string[];
   readonly orderIds: string[];
   readonly name: string;
@@ -154,7 +158,7 @@ export class CreateOutletRequestBody implements CreateOutletServicePayload {
   readonly serviceSchedule: CreateServiceScheduleRequestBody;
 }
 
-export class UpdateOutletRequestBody implements UpdateOutletServicePayload {
+export class UpdateStoreRequestBody implements UpdateStoreServicePayload {
   readonly menuIds?: string[];
   readonly orderIds?: string[];
   readonly name?: string;

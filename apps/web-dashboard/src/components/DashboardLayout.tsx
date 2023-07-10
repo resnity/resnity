@@ -91,11 +91,11 @@ export const DashboardLayout = () => {
         <Divider />
         <List>
           <ListItem disablePadding>
-            <ListItemButton component={Link} to="/outlets">
+            <ListItemButton component={Link} to="/stores">
               <ListItemIcon>
                 <RestaurantIcon />
               </ListItemIcon>
-              <ListItemText primary="Outlets" />
+              <ListItemText primary="Stores" />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>

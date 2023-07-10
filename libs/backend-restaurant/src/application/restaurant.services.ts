@@ -13,11 +13,12 @@ import {
   RestaurantRepository,
 } from '../infrastructure/restaurant.repository';
 import {
-  CreateOutletServicePayload,
   CreateRestaurantServicePayload,
+  CreateStoreServicePayload,
   CreateTableServicePayload,
-  UpdateOutletServicePayload,
+  SetupRestaurantServicePayload,
   UpdateRestaurantServicePayload,
+  UpdateStoreServicePayload,
   UpdateTableServicePayload,
 } from './restaurant.services.types';
 
@@ -25,7 +26,9 @@ export const RESTAURANT_SERVICE_TOKEN = Symbol('RESTAURANT_SERVICE_TOKEN');
 
 export interface RestaurantServices {
   getRestaurants(): Promise<Restaurant[]>;
+  getRestaurantById(restaurantId: string): Promise<Restaurant>;
 
+  setupRestaurant(payload: SetupRestaurantServicePayload): Promise<void>;
   createRestaurant(payload: CreateRestaurantServicePayload): Promise<string>;
   updateRestaurantById(
     restaurantId: string,
@@ -33,31 +36,31 @@ export interface RestaurantServices {
   ): Promise<void>;
   removeRestaurantById(restaurantId: string): Promise<void>;
 
-  createOutlet(
+  createStore(
     restaurantId: string,
-    payload: CreateOutletServicePayload,
+    payload: CreateStoreServicePayload,
   ): Promise<string>;
-  updateOutletById(
+  updateStoreById(
     restaurantId: string,
-    outletId: string,
-    payload: UpdateOutletServicePayload,
+    storeId: string,
+    payload: UpdateStoreServicePayload,
   ): Promise<void>;
-  removeOutletById(restaurantId: string, outletId: string): Promise<void>;
+  removeStoreById(restaurantId: string, storeId: string): Promise<void>;
 
   createTable(
     restaurantId: string,
-    outletId: string,
+    storeId: string,
     payload: CreateTableServicePayload,
   ): Promise<string>;
   updateTableById(
     restaurantId: string,
-    outletId: string,
+    storeId: string,
     tableId: string,
     payload: UpdateTableServicePayload,
   ): Promise<void>;
   removeTableById(
     restaurantId: string,
-    outletId: string,
+    storeId: string,
     tableId: string,
   ): Promise<void>;
 }
@@ -73,11 +76,30 @@ export class RestaurantServiceImpl implements RestaurantServices {
     return await this._repository.findMany();
   }
 
+  async getRestaurantById(orgId: string) {
+    return await this._getRestaurantById(orgId);
+  }
+
+  async setupRestaurant(payload: SetupRestaurantServicePayload) {
+    const restaurant = withTransformUnknownErrorToAppError(() =>
+      Restaurant.create({
+        menuIds: [],
+        stores: [],
+        ...payload,
+      }),
+    );
+
+    await this._repository.withTransaction(async () => {
+      await restaurant.publishEvents(this._eventEmitter);
+      await this._repository.create(restaurant);
+    });
+  }
+
   async createRestaurant(payload: CreateRestaurantServicePayload) {
     const restaurant = withTransformUnknownErrorToAppError(() =>
       Restaurant.create({
         menuIds: [],
-        outlets: [],
+        stores: [],
         ...payload,
       }),
     );
@@ -113,13 +135,10 @@ export class RestaurantServiceImpl implements RestaurantServices {
     });
   }
 
-  async createOutlet(
-    restaurantId: string,
-    payload: CreateOutletServicePayload,
-  ) {
+  async createStore(restaurantId: string, payload: CreateStoreServicePayload) {
     const restaurant = await this._getRestaurantById(restaurantId);
-    const outletId = withTransformUnknownErrorToAppError(() =>
-      restaurant.addOutlet({
+    const storeId = withTransformUnknownErrorToAppError(() =>
+      restaurant.addStore({
         tables: [],
         ...payload,
       }),
@@ -130,17 +149,17 @@ export class RestaurantServiceImpl implements RestaurantServices {
       await this._repository.update(restaurant);
     });
 
-    return outletId;
+    return storeId;
   }
 
-  async updateOutletById(
+  async updateStoreById(
     restaurantId: string,
-    outletId: string,
-    payload: UpdateOutletServicePayload,
+    storeId: string,
+    payload: UpdateStoreServicePayload,
   ) {
     const restaurant = await this._getRestaurantById(restaurantId);
     withTransformUnknownErrorToAppError(() =>
-      restaurant.updateOutletById(outletId, payload),
+      restaurant.updateStoreById(storeId, payload),
     );
 
     await this._repository.withTransaction(async () => {
@@ -149,10 +168,10 @@ export class RestaurantServiceImpl implements RestaurantServices {
     });
   }
 
-  async removeOutletById(restaurantId: string, outletId: string) {
+  async removeStoreById(restaurantId: string, storeId: string) {
     const restaurant = await this._getRestaurantById(restaurantId);
     withTransformUnknownErrorToAppError(() =>
-      restaurant.removeOutletById(outletId),
+      restaurant.removeStoreById(storeId),
     );
 
     await this._repository.withTransaction(async () => {
@@ -163,12 +182,12 @@ export class RestaurantServiceImpl implements RestaurantServices {
 
   async createTable(
     restaurantId: string,
-    outletId: string,
+    storeId: string,
     payload: CreateTableServicePayload,
   ) {
     const restaurant = await this._getRestaurantById(restaurantId);
     const tableId = withTransformUnknownErrorToAppError(() =>
-      restaurant.addTable(outletId, payload),
+      restaurant.addTable(storeId, payload),
     );
 
     await this._repository.withTransaction(async () => {
@@ -181,13 +200,13 @@ export class RestaurantServiceImpl implements RestaurantServices {
 
   async updateTableById(
     restaurantId: string,
-    outletId: string,
+    storeId: string,
     tableId: string,
     payload: UpdateTableServicePayload,
   ) {
     const restaurant = await this._getRestaurantById(restaurantId);
     withTransformUnknownErrorToAppError(() =>
-      restaurant.updateTableById(outletId, tableId, payload),
+      restaurant.updateTableById(storeId, tableId, payload),
     );
 
     await this._repository.withTransaction(async () => {
@@ -198,12 +217,12 @@ export class RestaurantServiceImpl implements RestaurantServices {
 
   async removeTableById(
     restaurantId: string,
-    outletId: string,
+    storeId: string,
     tableId: string,
   ) {
     const restaurant = await this._getRestaurantById(restaurantId);
     withTransformUnknownErrorToAppError(() =>
-      restaurant.removeTableById(outletId, tableId),
+      restaurant.removeTableById(storeId, tableId),
     );
 
     await this._repository.withTransaction(async () => {

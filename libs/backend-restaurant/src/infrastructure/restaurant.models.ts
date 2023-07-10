@@ -59,7 +59,7 @@ export class TableModel extends Model {
   readonly capacity: number;
 }
 
-export class OutletModel extends Model {
+export class StoreModel extends Model {
   @AutoMap(() => [String])
   readonly menuIds: string[];
   @AutoMap(() => [String])
@@ -81,6 +81,8 @@ export class RestaurantModel extends Model {
   readonly menuIds: string[];
   @AutoMap()
   readonly name: string;
-  @AutoMap(() => [OutletModel])
-  readonly outlets: OutletModel[];
+  @AutoMap()
+  readonly displayName?: string;
+  @AutoMap(() => [StoreModel])
+  readonly stores: StoreModel[];
 }

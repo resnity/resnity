@@ -63,7 +63,6 @@ export const PlatformLayout = () => {
         </Container>
       </Layout.Header>
       <Divider style={{ margin: 0 }} />
-
       <Outlet />
     </Layout>
   );

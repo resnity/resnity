@@ -2,7 +2,7 @@ import { createRemoteJWKSet, jwtVerify } from 'jose';
 
 import { Environment, UnauthorizedError } from '@resnity/backend-common';
 
-import { JwtPayload } from './jwt.types';
+import { JwtPayload } from './jwt.service.types';
 
 export interface JwtService {
   validate(token: string): Promise<JwtPayload>;
@@ -12,8 +12,8 @@ export class JwtServiceImpl {
   constructor(private readonly environment: Environment) {}
 
   async validate(token: string) {
-    const audience = this.environment.AUTH0_AUDIENCE;
-    const domain = this.environment.AUTH0_DOMAIN;
+    const audience = this.environment.OAUTH2_AUDIENCE;
+    const domain = this.environment.OAUTH2_DOMAIN;
 
     const jwks = createRemoteJWKSet(
       new URL(`https://${domain}/.well-known/jwks.json`),

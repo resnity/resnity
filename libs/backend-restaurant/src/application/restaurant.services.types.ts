@@ -1,14 +1,22 @@
-import { CreateAddressPayload } from '../domain/value-object/address.value-object.types';
-import { CreateContactPayload } from '../domain/value-object/contact.value-object.types';
-import { CreateTimePeriodPayload } from '../domain/value-object/time-period.value-object.types';
+import { CreateAddressPayload } from '../domain/value-objects/address.value-object.types';
+import { CreateContactPayload } from '../domain/value-objects/contact.value-object.types';
+import { CreateTimePeriodPayload } from '../domain/value-objects/time-period.value-object.types';
+
+export type SetupRestaurantServicePayload = {
+  id: string;
+  name: string;
+  displayName?: string;
+};
 
 export type CreateRestaurantServicePayload = {
   name: string;
+  displayName?: string;
 };
 
 export type UpdateRestaurantServicePayload = {
   menuIds?: string[];
   name?: string;
+  displayName?: string;
 };
 
 export type CreateAddressServicePayload = CreateAddressPayload;
@@ -28,7 +36,7 @@ export type CreateServiceScheduleServicePayload = {
   sunday: CreateTimePeriodServicePayload;
 };
 
-export type CreateOutletServicePayload = {
+export type CreateStoreServicePayload = {
   menuIds: string[];
   orderIds: string[];
   name: string;
@@ -37,7 +45,7 @@ export type CreateOutletServicePayload = {
   serviceSchedule: CreateServiceScheduleServicePayload;
 };
 
-export type UpdateOutletServicePayload = {
+export type UpdateStoreServicePayload = {
   menuIds?: string[];
   orderIds?: string[];
   name?: string;

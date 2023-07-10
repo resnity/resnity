@@ -6,7 +6,7 @@ import {
   domainSchemaValidatorBuilder,
 } from '@resnity/backend-common';
 
-import { CreateOutletPayload } from './entity/outlet.entity.types';
+import { CreateStorePayload } from './entities/store.entity.types';
 
 const restaurantIdSchema = EntityId.brand<'RestaurantId'>();
 
@@ -16,23 +16,38 @@ const restaurantNameSchema = z
   .max(50)
   .brand<'RestaurantName'>();
 
+const restaurantDisplayNameSchema = z
+  .string()
+  .min(2)
+  .max(50)
+  .brand<'RestaurantDisplayName'>();
+const maybeRestaurantDisplayNameSchema = restaurantDisplayNameSchema.optional();
+
 export const assertRestaurantIdValid: Validate<typeof restaurantIdSchema> =
   domainSchemaValidatorBuilder(restaurantIdSchema);
 
 export const assertRestaurantNameValid: Validate<typeof restaurantNameSchema> =
   domainSchemaValidatorBuilder(restaurantNameSchema);
 
+export const assertMaybeRestaurantDisplayNameValid: Validate<
+  typeof maybeRestaurantDisplayNameSchema
+> = domainSchemaValidatorBuilder(maybeRestaurantDisplayNameSchema);
+
 export type RestaurantId = z.infer<typeof restaurantIdSchema>;
 
 export type RestaurantName = z.infer<typeof restaurantNameSchema>;
 
+export type RestaurantDisplayName = z.infer<typeof restaurantDisplayNameSchema>;
+
 export type CreateRestaurantPayload = {
-  name: string;
   menuIds: string[];
-  outlets: CreateOutletPayload[];
+  name: string;
+  displayName?: string;
+  stores: CreateStorePayload[];
 };
 
 export type UpdateRestaurantPayload = {
   menuIds?: string[];
   name?: string;
+  displayName?: string;
 };
